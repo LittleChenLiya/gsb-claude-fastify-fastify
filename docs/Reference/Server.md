@@ -29,6 +29,7 @@ describes the properties available in that options object.
   - [`trustProxy`](#trustproxy)
   - [`pluginTimeout`](#plugintimeout)
   - [`exposeHeadRoutes`](#exposeheadroutes)
+  - [`mediaTypeVersioning`](#media-type-versioning)
   - [`return503OnClosing`](#return503onclosing)
   - [`ajv`](#ajv)
   - [`serializerOpts`](#serializeropts)
@@ -659,6 +660,35 @@ const fastify = require('fastify')({
 Automatically creates a sibling `HEAD` route for each `GET` route defined. If
 you want a custom `HEAD` handler without disabling this option, make sure to
 define it before the `GET` route.
+
+### `mediaTypeVersioning`
+<a id="media-type-versioning"></a>
+
+Enables version negotiation through the media type parameters of the request
+`Accept` header, so clients do not need to send a separate
+`Accept-Version` header. When set, routes can declare `apiVersion` and
+`mediaType` constraints, see
+[Media Type Version Constraints](./Routes.md#media-type-version-constraints).
+
+```js
+const fastify = require('fastify')({
+  mediaTypeVersioning: {
+    // version used when the request has no Accept header
+    defaultVersion: '1',
+    // tie-break order between acceptable versions with equal q and
+    // media type specificity; versions not listed have the lowest priority
+    versionPriority: ['2', '1']
+  }
+})
+```
+
+Both properties are optional. The same strategy can be enabled by registering
+`fastify.mediaTypeVersioningPlugin` with the same options, in which case
+routes must be registered in plugins loaded after it:
+
+```js
+fastify.register(fastify.mediaTypeVersioningPlugin, { defaultVersion: '1' })
+```
 
 ### `return503OnClosing`
 <a id="factory-return-503-on-closing"></a>

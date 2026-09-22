@@ -522,6 +522,12 @@ expect(fastify().hasRoute({
 expect(fastify().hasRoute({
   url: '/',
   method: 'GET',
+  constraints: { apiVersion: '2', mediaType: 'application/vnd.demo+json' }
+})).type.toBe<boolean>()
+
+expect(fastify().hasRoute({
+  url: '/',
+  method: 'GET',
   constraints: {
     // constraints value should accept any value
     number: 12,

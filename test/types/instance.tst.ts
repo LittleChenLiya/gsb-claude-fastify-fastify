@@ -8,6 +8,7 @@ import fastify, {
   FastifyInstance,
   FastifyListenOptions,
   FastifyRouterOptions,
+  MediaTypeVersioningOptions,
   RawReplyDefaultExpression,
   RawRequestDefaultExpression,
   RawServerDefault,
@@ -321,6 +322,7 @@ type InitialConfig = Readonly<{
   requestIdHeader?: string | false,
   http2SessionTimeout?: number,
   useSemicolonDelimiter?: boolean,
+  mediaTypeVersioning?: MediaTypeVersioningOptions,
   routerOptions?: FastifyRouterOptions<RawServerDefault>
 }>
 

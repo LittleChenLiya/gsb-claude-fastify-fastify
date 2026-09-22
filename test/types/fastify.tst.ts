@@ -68,6 +68,11 @@ expect(fastify({ schemaController: {} })).type.toBe<
   SafePromiseLike<FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse>>
 >()
 
+expect(fastify({ mediaTypeVersioning: { defaultVersion: '1', versionPriority: ['2', '1'] } })).type.toBe<
+  FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse> &
+  SafePromiseLike<FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse>>
+>()
+
 expect(fastify({ http2: false })).type.toBe<
   FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse> &
   SafePromiseLike<FastifyInstance<http.Server, http.IncomingMessage, http.ServerResponse>>

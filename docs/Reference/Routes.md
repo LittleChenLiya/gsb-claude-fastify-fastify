@@ -19,6 +19,7 @@ declared using the shorthand method or the full declaration.
 - [Config](#config)
 - [Constraints](#constraints)
   - [Version Constraints](#version-constraints)
+  - [Media Type Version Constraints](#media-type-version-constraints)
   - [Host Constraints](#host-constraints)
 
 ### Full declaration
@@ -713,6 +714,68 @@ If the request lacks an `Accept-Version` header, a 404 error will be returned.
 Custom version matching logic can be defined through the
 [`constraints`](./Server.md#constraints) configuration when creating a Fastify
 server instance.
+
+#### Media Type Version Constraints
+
+As an alternative to the `Accept-Version` header, routes can be versioned
+through the media type parameters of the request `Accept` header. This
+strategy is opt-in: enable it with the
+[`mediaTypeVersioning`](./Server.md#media-type-versioning) server option or
+by registering `fastify.mediaTypeVersioningPlugin` before declaring routes.
+
+Versioned routes declare an `apiVersion` and, optionally, a `mediaType` in
+their `constraints`:
+
+```js
+fastify.get('/demo', {
+  constraints: { apiVersion: '2', mediaType: 'application/vnd.demo+json' },
+  handler: function (request, reply) {
+    reply.send({ version: '2' })
+  }
+})
+```
+
+Clients select a version with a `version` media type parameter, and can
+combine it with quality values, wildcards, and multiple entries:
+
+```http
+Accept: application/vnd.demo+json;version=2;q=0.8, application/*;version=1;q=0.4
+```
+
+The negotiation follows these rules:
+
+- Versions are matched by exact, case-sensitive comparison against the
+  registered `apiVersion` values. Entries without a `version` parameter
+  match every version of their media type.
+- Media types match exactly (case-insensitive), or through the
+  `type/*` and `*/*` wildcards.
+- When several registered routes are acceptable, the winner is picked by
+  highest `q` value, then by media type specificity (exact, then
+  `type/*`, then `*/*`), then by the configured `versionPriority`
+  order. Remaining ties are broken deterministically, never by registration
+  order.
+- Entries with `q=0` are never selected.
+- Quoted parameter values (including commas inside quotes) are supported.
+- When the request has no `Accept` header, the configured
+  `defaultVersion` is used.
+- A duplicated `version` parameter or an invalid `q` value is answered
+  with `400`.
+- When versioned routes exist for the path but none is acceptable, the
+  request is answered with `406`. If the negotiation did match a version
+  but another constraint (method, `host`, or a custom constraint) excluded
+  every route, the regular `404` handling applies. Paths without versioned
+  routes are answered with `404` as usual.
+- Routes without `apiVersion` constraints are never affected by the
+  negotiation and keep matching normally.
+- Responses of negotiated routes merge `Accept` into the `Vary` header
+  without overwriting existing `Vary` values. The `400` and `406`
+  responses also carry `Vary: Accept`.
+- The negotiation only inspects the `Accept` header and the registered
+  constraints; candidate handlers are never executed to probe for a match.
+
+The `mediaType` constraint requires `apiVersion` to be set. The strategy
+composes with `host` and custom constraints: all constraints of a route
+must match for its handler to run.
 
 #### Host Constraints
 

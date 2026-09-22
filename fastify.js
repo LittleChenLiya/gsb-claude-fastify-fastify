@@ -34,7 +34,8 @@ const {
   kGenReqId,
   kErrorHandlerAlreadySet,
   kHandlerTimeout,
-  kLogController
+  kLogController,
+  kMediaTypeNegotiation
 } = require('./lib/symbols.js')
 
 const { createServer } = require('./lib/server')
@@ -50,6 +51,7 @@ const pluginUtils = require('./lib/plugin-utils.js')
 const { getGenReqId, reqIdGenFactory } = require('./lib/req-id-gen-factory.js')
 const { buildRouting, validateBodyLimitOption, buildRouterOptions } = require('./lib/route')
 const build404 = require('./lib/four-oh-four')
+const { buildMediaTypeVersionStrategy, mediaTypeVersioningPlugin } = require('./lib/media-type-versioning')
 const getSecuredInitialConfig = require('./lib/initial-config-validation.js')
 const override = require('./lib/plugin-override')
 const {
@@ -76,7 +78,8 @@ const {
   FST_ERR_ERROR_HANDLER_NOT_FN,
   FST_ERR_ERROR_HANDLER_ALREADY_SET,
   FST_ERR_ROUTE_METHOD_INVALID,
-  FST_ERR_ROUTE_METHOD_ALREADY_SUPPORTED
+  FST_ERR_ROUTE_METHOD_ALREADY_SUPPORTED,
+  FST_ERR_NOT_ACCEPTABLE
 } = errorCodes
 
 const { buildErrorHandler } = require('./lib/error-handler.js')
@@ -448,6 +451,14 @@ function fastify (serverOptions) {
     keepAliveConnections
   })
 
+  // Optional media type version negotiation constraint strategy.
+  // When enabled, routes can be registered with "apiVersion" and "mediaType"
+  // constraints and are matched against the media type parameters of the
+  // request Accept header.
+  if (options.mediaTypeVersioning !== undefined) {
+    fastify.addConstraintStrategy(buildMediaTypeVersionStrategy(options.mediaTypeVersioning))
+  }
+
   // Delay configuring clientError handler so that it can access fastify state.
   server.on('clientError', options.clientErrorHandler.bind(fastify))
 
@@ -631,6 +642,35 @@ function fastify (serverOptions) {
   // If the router does not match any route, every request will land here
   // req and res are Node.js core objects
   function defaultRoute (req, res) {
+    // Media type version negotiation rules:
+    // - a malformed Accept header (invalid q value or duplicated "version"
+    //   parameter) is answered with 400 when the requested path declares
+    //   versioned routes
+    // - when versioned routes exist for the requested path but none of them
+    //   is acceptable, the request is answered with 406 instead of 404
+    // - when the negotiation did match a version but another constraint
+    //   (method, host, custom) excluded every route, the regular 404 flow
+    //   applies
+    // - requests to paths without versioned routes are not affected and
+    //   follow the regular 404 flow
+    const negotiation = req[kMediaTypeNegotiation]
+    if (negotiation !== undefined && negotiation.applied === true && negotiation.matched !== true) {
+      const negotiationError = negotiation.error !== null ? negotiation.error : new FST_ERR_NOT_ACCEPTABLE()
+      const body = JSON.stringify({
+        error: http.STATUS_CODES[negotiationError.statusCode],
+        code: negotiationError.code,
+        message: negotiationError.message,
+        statusCode: negotiationError.statusCode
+      })
+      res.writeHead(negotiationError.statusCode, {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(body),
+        Vary: 'Accept'
+      })
+      res.end(body)
+      return
+    }
+
     if (req.headers['accept-version'] !== undefined) {
       // we remove the accept-version header for performance result
       // because we do not want to go through the constraint checking
@@ -1005,5 +1045,6 @@ function validateSchemaErrorFormatter (schemaErrorFormatter) {
 module.exports = fastify
 module.exports.errorCodes = errorCodes
 module.exports.LogController = LogController
+module.exports.mediaTypeVersioningPlugin = mediaTypeVersioningPlugin
 module.exports.fastify = fastify
 module.exports.default = fastify

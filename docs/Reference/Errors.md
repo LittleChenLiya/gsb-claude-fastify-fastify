@@ -78,6 +78,12 @@
     - [FST_ERR_BAD_URL](#fst_err_bad_url)
     - [FST_ERR_MAX_PARAM_LENGTH](#fst_err_max_param_length)
     - [FST_ERR_ASYNC_CONSTRAINT](#fst_err_async_constraint)
+    - [FST_ERR_NOT_ACCEPTABLE](#fst_err_not_acceptable)
+    - [FST_ERR_ACCEPT_INVALID_Q](#fst_err_accept_invalid_q)
+    - [FST_ERR_ACCEPT_DUPLICATE_VERSION](#fst_err_accept_duplicate_version)
+    - [FST_ERR_VERSIONING_NOT_ENABLED](#fst_err_versioning_not_enabled)
+    - [FST_ERR_VERSIONING_INVALID_OPTIONS](#fst_err_versioning_invalid_options)
+    - [FST_ERR_VERSIONING_INVALID_CONSTRAINT](#fst_err_versioning_invalid_constraint)
     - [FST_ERR_INVALID_URL](#fst_err_invalid_url)
     - [FST_ERR_ROUTE_OPTIONS_NOT_OBJ](#fst_err_route_options_not_obj)
     - [FST_ERR_ROUTE_DUPLICATED_HANDLER](#fst_err_route_duplicated_handler)
@@ -432,6 +438,12 @@ Below is a table with all the error codes used by Fastify.
 | <a id="fst_err_bad_url">FST_ERR_BAD_URL</a> | The router received an invalid URL. | Use a valid URL. | [#2106](https://github.com/fastify/fastify/pull/2106) |
 | <a id="fst_err_max_param_length">FST_ERR_MAX_PARAM_LENGTH</a> | The router received an URL that exceed max param length. | Adjust the param length or increase the max param length to meet your needs. | [#2106](https://github.com/fastify/fastify/pull/6716) |
 | <a id="fst_err_async_constraint">FST_ERR_ASYNC_CONSTRAINT</a> | The router received an error when using asynchronous constraints. | - | [#4323](https://github.com/fastify/fastify/pull/4323) |
+| <a id="fst_err_not_acceptable">FST_ERR_NOT_ACCEPTABLE</a> | No route matches the requested media type and version. | Send an `Accept` header that matches a registered `apiVersion` and `mediaType`. | - |
+| <a id="fst_err_accept_invalid_q">FST_ERR_ACCEPT_INVALID_Q</a> | The `q` value of an `Accept` header entry is invalid. | Use a `q` value between `0` and `1` with at most three decimals. | - |
+| <a id="fst_err_accept_duplicate_version">FST_ERR_ACCEPT_DUPLICATE_VERSION</a> | An `Accept` header entry declares the `version` parameter more than once. | Declare `version` at most once per `Accept` entry. | - |
+| <a id="fst_err_versioning_not_enabled">FST_ERR_VERSIONING_NOT_ENABLED</a> | A route uses `apiVersion` or `mediaType` constraints without enabling media type versioning. | Set the `mediaTypeVersioning` server option or register `fastify.mediaTypeVersioningPlugin`. | - |
+| <a id="fst_err_versioning_invalid_options">FST_ERR_VERSIONING_INVALID_OPTIONS</a> | The `mediaTypeVersioning` options are invalid. | Use a non-empty string `defaultVersion` and an array of strings for `versionPriority`. | - |
+| <a id="fst_err_versioning_invalid_constraint">FST_ERR_VERSIONING_INVALID_CONSTRAINT</a> | An `apiVersion` or `mediaType` route constraint is invalid. | Use a non-empty string `apiVersion` and a `type/subtype` `mediaType`. | - |
 | <a id="fst_err_invalid_url">FST_ERR_INVALID_URL</a> | URL must be a string. | Use a string for the URL. | [#3653](https://github.com/fastify/fastify/pull/3653) |
 | <a id="fst_err_route_options_not_obj">FST_ERR_ROUTE_OPTIONS_NOT_OBJ</a> | Options for the route must be an object. | Use an object for the route options. | [#4554](https://github.com/fastify/fastify/pull/4554) |
 | <a id="fst_err_route_duplicated_handler">FST_ERR_ROUTE_DUPLICATED_HANDLER</a> | Duplicate handler for the route is not allowed. | Use a different handler. | [#4554](https://github.com/fastify/fastify/pull/4554) |

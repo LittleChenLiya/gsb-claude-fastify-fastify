@@ -40,6 +40,8 @@ export type RouteConstraintType = Omit<ConstraintStrategy<any>, 'deriveConstrain
 export interface RouteConstraint {
   version?: string
   host?: RegExp | string
+  apiVersion?: string
+  mediaType?: string
   [name: string]: unknown
 }
 

@@ -45,6 +45,7 @@ type Fastify = typeof fastify
 declare namespace fastify {
   export const errorCodes: FastifyErrorCodes
   export { LogControllerClass as LogController }
+  export const mediaTypeVersioningPlugin: FastifyPluginCallback<MediaTypeVersioningOptions>
 
   export type FastifyHttp2SecureOptions<
     Server extends http2.Http2SecureServer,
@@ -119,6 +120,19 @@ declare namespace fastify {
   /**
    * Options for a fastify server instance. Utilizes conditional logic on the generic server parameter to enforce certain https and http2
    */
+  export interface MediaTypeVersioningOptions {
+    /**
+     * Version selected when the request does not carry an Accept header.
+     */
+    defaultVersion?: string,
+    /**
+     * Versions ordered from most to least preferred, used to break ties
+     * between acceptable versions with equal q value and media type
+     * specificity.
+     */
+    versionPriority?: string[]
+  }
+
   export type FastifyServerOptions<
     RawServer extends RawServerBase = RawServerDefault,
     Logger extends FastifyBaseLogger = FastifyBaseLogger
@@ -136,6 +150,7 @@ declare namespace fastify {
     maxParamLength?: number,
     logController?: LogControllerClass,
     exposeHeadRoutes?: boolean,
+    mediaTypeVersioning?: MediaTypeVersioningOptions,
     onProtoPoisoning?: ProtoAction,
     onConstructorPoisoning?: ConstructorAction,
     logger?: boolean | FastifyLoggerOptions<RawServer> & PinoLoggerOptions,
