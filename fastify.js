@@ -19,6 +19,7 @@ const {
   kHooks,
   kSchemaController,
   kRequestAcceptVersion,
+  kMediaTypeVersionState,
   kReplySerializerDefault,
   kContentTypeParser,
   kReply,
@@ -49,6 +50,7 @@ const { createChildLogger, defaultChildLoggerFactory, createLogger, createLogCon
 const pluginUtils = require('./lib/plugin-utils.js')
 const { getGenReqId, reqIdGenFactory } = require('./lib/req-id-gen-factory.js')
 const { buildRouting, validateBodyLimitOption, buildRouterOptions } = require('./lib/route')
+const { buildMediaTypeVersionStrategy } = require('./lib/media-type-version-strategy')
 const build404 = require('./lib/four-oh-four')
 const getSecuredInitialConfig = require('./lib/initial-config-validation.js')
 const override = require('./lib/plugin-override')
@@ -63,6 +65,8 @@ const { defaultInitOptions } = getSecuredInitialConfig
 const {
   FST_ERR_ASYNC_CONSTRAINT,
   FST_ERR_BAD_URL,
+  FST_ERR_ACCEPT_HEADER_INVALID,
+  FST_ERR_NO_ACCEPTABLE_VERSION,
   FST_ERR_MAX_PARAM_LENGTH,
   FST_ERR_OPTIONS_NOT_OBJ,
   FST_ERR_QSP_NOT_FN,
@@ -94,6 +98,18 @@ function fastify (serverOptions) {
     hasLogger,
     initialConfig
   } = processOptions(serverOptions, defaultRoute, onBadUrl, onMaxParamLength)
+
+  // Optional constraint strategy that negotiates the API version from
+  // the media type parameters of the Accept header. An apiVersion
+  // strategy explicitly provided through routerOptions.constraints
+  // takes precedence.
+  if (options.mediaTypeVersioning !== undefined &&
+    (options.routerOptions.constraints === undefined || options.routerOptions.constraints.apiVersion === undefined)) {
+    options.routerOptions.constraints = {
+      ...options.routerOptions.constraints,
+      apiVersion: buildMediaTypeVersionStrategy(options.mediaTypeVersioning)
+    }
+  }
 
   // Default router
   const router = buildRouting(options.routerOptions)
@@ -638,7 +654,51 @@ function fastify (serverOptions) {
       req.headers[kRequestAcceptVersion] = req.headers['accept-version']
       req.headers['accept-version'] = undefined
     }
+    const mediaTypeVersionState = req[kMediaTypeVersionState]
+    if (mediaTypeVersionState !== undefined && mediaTypeVersionState.outcome !== 'ok') {
+      return mediaTypeVersionNegotiationFailed(req, res, mediaTypeVersionState)
+    }
     fourOhFour.router.lookup(req, res)
+  }
+
+  // Media type version negotiation ended without a route to run:
+  // - outcome 'error': the Accept header is malformed (invalid q value
+  //   or duplicated version parameter) and the answer is a 400
+  // - outcome 'not-acceptable': the path matched versioned routes but
+  //   none of them is acceptable and the answer is a 406
+  // Requests whose path does not match any route never get one of these
+  // outcomes, so they keep the regular 404 flow (including custom 404
+  // handlers). These responses are sent before the 404 handling and are
+  // not affected by setNotFoundHandler.
+  function mediaTypeVersionNegotiationFailed (req, res, state) {
+    const error = state.outcome === 'error'
+      ? new FST_ERR_ACCEPT_HEADER_INVALID(state.message)
+      : new FST_ERR_NO_ACCEPTABLE_VERSION()
+
+    if (options.frameworkErrors) {
+      const id = getGenReqId(routeEventContext.server, req)
+      const childLogger = createChildLogger(routeEventContext, options.logger, req, id)
+
+      const request = new Request(id, null, req, null, childLogger, routeEventContext)
+      const reply = new Reply(res, request, childLogger)
+
+      routeEventContext.server[kLogController].incomingRequest(request, reply)
+
+      return options.frameworkErrors(error, request, reply)
+    }
+
+    const body = JSON.stringify({
+      error: http.STATUS_CODES[error.statusCode],
+      code: error.code,
+      message: error.message,
+      statusCode: error.statusCode
+    })
+    res.writeHead(error.statusCode, {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(body),
+      Vary: 'Accept'
+    })
+    res.end(body)
   }
 
   function onBadUrl (path, req, res) {
@@ -1004,6 +1064,7 @@ function validateSchemaErrorFormatter (schemaErrorFormatter) {
  */
 module.exports = fastify
 module.exports.errorCodes = errorCodes
+module.exports.buildMediaTypeVersionStrategy = buildMediaTypeVersionStrategy
 module.exports.LogController = LogController
 module.exports.fastify = fastify
 module.exports.default = fastify

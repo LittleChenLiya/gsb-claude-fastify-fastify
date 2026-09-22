@@ -69,6 +69,8 @@ export interface RouteShorthandOptions<
   logLevel?: LogLevel;
   config?: FastifyContextConfig & ContextConfig;
   constraints?: RouteConstraint,
+  apiVersion?: string | number;
+  mediaType?: string;
   prefixTrailingSlash?: 'slash' | 'no-slash' | 'both';
   errorHandler?: (
     this: FastifyInstance<RawServer, RawRequest, RawReply, Logger, TypeProvider>,

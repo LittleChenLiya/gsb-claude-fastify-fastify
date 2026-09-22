@@ -96,6 +96,14 @@ const schema = {
     requestIdHeader: { anyOf: [{ type: 'boolean' }, { type: 'string' }], default: defaultInitOptions.requestIdHeader },
     http2SessionTimeout: { type: 'integer', default: defaultInitOptions.http2SessionTimeout },
     exposeHeadRoutes: { type: 'boolean', default: defaultInitOptions.exposeHeadRoutes },
+    mediaTypeVersioning: {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        defaultVersion: { type: 'string' },
+        versionPriority: { type: 'array', items: { type: 'string' } }
+      }
+    },
     routerOptions: {
       type: 'object',
       additionalProperties: false,

@@ -42,6 +42,7 @@ describes the properties available in that options object.
     - [`buildPrettyMeta`](#buildprettymeta)
     - [`caseSensitive`](#casesensitive)
     - [`constraints`](#constraints)
+    - [`mediaTypeVersioning`](#mediatypeversioning)
     - [`defaultRoute`](#defaultroute)
     - [`ignoreDuplicateSlashes`](#ignoreduplicateslashes)
     - [`ignoreTrailingSlash`](#ignoretrailingslash)
@@ -949,6 +950,31 @@ const fastify = require('fastify')({
     constraints: {
       version: customVersionStrategy
     }
+  }
+})
+```
+
+### `mediaTypeVersioning`
+<a id="media-type-versioning"></a>
+
+Enables the optional constraint strategy that negotiates the API version from
+the media type parameters of the `Accept` header (for example
+`application/vnd.demo+json;version=2;q=0.8`) instead of the
+`Accept-Version` header. Routes opt in with the `apiVersion` and
+`mediaType` options. See
+[Media Type Version Constraints](./Routes.md#media-type-version-constraints)
+for the full negotiation rules.
+
++ Default: `undefined` (disabled)
+
+```js
+const fastify = require('fastify')({
+  mediaTypeVersioning: {
+    // version used when the request has no Accept header
+    defaultVersion: '1',
+    // versions ordered from the most to the least preferred, used to
+    // break ties between equally acceptable routes
+    versionPriority: ['2', '1']
   }
 })
 ```

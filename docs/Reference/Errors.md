@@ -86,6 +86,10 @@
     - [FST_ERR_ROUTE_METHOD_INVALID](#fst_err_route_method_invalid)
     - [FST_ERR_ROUTE_METHOD_ALREADY_SUPPORTED](#fst_err_route_method_already_supported)
     - [FST_ERR_ROUTE_METHOD_NOT_SUPPORTED](#fst_err_route_method_not_supported)
+    - [FST_ERR_ROUTE_VERSIONING_NOT_ENABLED](#fst_err_route_versioning_not_enabled)
+    - [FST_ERR_ROUTE_VERSIONING_INVALID_OPTIONS](#fst_err_route_versioning_invalid_options)
+    - [FST_ERR_ACCEPT_HEADER_INVALID](#fst_err_accept_header_invalid)
+    - [FST_ERR_NO_ACCEPTABLE_VERSION](#fst_err_no_acceptable_version)
     - [FST_ERR_ROUTE_LOG_LEVEL_INVALID](#fst_err_route_log_level_invalid)
     - [FST_ERR_ROUTE_BODY_VALIDATION_SCHEMA_NOT_SUPPORTED](#fst_err_route_body_validation_schema_not_supported)
     - [FST_ERR_ROUTE_BODY_LIMIT_OPTION_NOT_INT](#fst_err_route_body_limit_option_not_int)
@@ -440,6 +444,10 @@ Below is a table with all the error codes used by Fastify.
 | <a id="fst_err_route_method_invalid">FST_ERR_ROUTE_METHOD_INVALID</a> | Method is not a valid value. | Use a valid value for the method. | [#4750](https://github.com/fastify/fastify/pull/4750) |
 | <a id="fst_err_route_method_already_supported">FST_ERR_ROUTE_METHOD_ALREADY_SUPPORTED</a> | The HTTP method is already supported. | Pass `{ overrideExisting: true }` to explicitly override it. | [#6909](https://github.com/fastify/fastify/pull/6909) |
 | <a id="fst_err_route_method_not_supported">FST_ERR_ROUTE_METHOD_NOT_SUPPORTED</a> | Method is not supported for the route. | Use a supported method. | [#4554](https://github.com/fastify/fastify/pull/4554) |
+| <a id="fst_err_route_versioning_not_enabled">FST_ERR_ROUTE_VERSIONING_NOT_ENABLED</a> | The route uses `apiVersion`/`mediaType` options but the media type versioning constraint strategy is not enabled. | Enable the `mediaTypeVersioning` server option or register the strategy with `addConstraintStrategy`. | - |
+| <a id="fst_err_route_versioning_invalid_options">FST_ERR_ROUTE_VERSIONING_INVALID_OPTIONS</a> | The `apiVersion` and `mediaType` route options are invalid. | Provide both options: `apiVersion` as a string or number and `mediaType` as a string. | - |
+| <a id="fst_err_accept_header_invalid">FST_ERR_ACCEPT_HEADER_INVALID</a> | The Accept header cannot be used for media type version negotiation. | Send a valid quality value and do not repeat the `version` parameter in a single media type. | - |
+| <a id="fst_err_no_acceptable_version">FST_ERR_NO_ACCEPTABLE_VERSION</a> | No route can satisfy the media type and version requested in the Accept header. | Request a media type and version combination that is registered. | - |
 | <a id="fst_err_route_log_level_invalid">FST_ERR_ROUTE_LOG_LEVEL_INVALID</a> | `logLevel` must match a configured logger level. | Use one of the configured logger levels for the route. | [#6523](https://github.com/fastify/fastify/pull/6523) |
 | <a id="fst_err_route_body_validation_schema_not_supported">FST_ERR_ROUTE_BODY_VALIDATION_SCHEMA_NOT_SUPPORTED</a> | Body validation schema route is not supported. | Use a different different method for the route. | [#4554](https://github.com/fastify/fastify/pull/4554) |
 | <a id="fst_err_route_body_limit_option_not_int">FST_ERR_ROUTE_BODY_LIMIT_OPTION_NOT_INT</a> | `bodyLimit` option must be an integer. | Use an integer for the `bodyLimit` option. | [#4554](https://github.com/fastify/fastify/pull/4554) |

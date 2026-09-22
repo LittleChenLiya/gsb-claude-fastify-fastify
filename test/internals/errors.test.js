@@ -5,7 +5,7 @@ const errors = require('../../lib/errors')
 const { readFileSync } = require('node:fs')
 const { resolve } = require('node:path')
 
-const expectedErrors = 95
+const expectedErrors = 99
 
 test(`should expose ${expectedErrors} errors`, t => {
   t.plan(1)

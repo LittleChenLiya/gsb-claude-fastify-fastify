@@ -46,6 +46,26 @@ declare namespace fastify {
   export const errorCodes: FastifyErrorCodes
   export { LogControllerClass as LogController }
 
+  export interface FastifyMediaTypeVersioningOptions {
+    /** Version used when the request has no Accept header. */
+    defaultVersion?: string;
+    /** Versions ordered from the most to the least preferred, used to break ties. */
+    versionPriority?: string[];
+  }
+
+  export interface MediaTypeVersionConstraintValue {
+    version: string;
+    mediaType: string;
+  }
+
+  /**
+   * Builds the optional constraint strategy that negotiates the API version
+   * from the media type parameters of the Accept header.
+   */
+  export const buildMediaTypeVersionStrategy: (
+    options?: FastifyMediaTypeVersioningOptions
+  ) => ConstraintStrategy<HTTPVersion.V1, MediaTypeVersionConstraintValue>
+
   export type FastifyHttp2SecureOptions<
     Server extends http2.Http2SecureServer,
     Logger extends FastifyBaseLogger = FastifyBaseLogger
@@ -201,6 +221,7 @@ declare namespace fastify {
     childLoggerFactory?: FastifyChildLoggerFactory,
     allowErrorHandlerOverride?: boolean
     routerOptions?: FastifyRouterOptions<RawServer>,
+    mediaTypeVersioning?: FastifyMediaTypeVersioningOptions,
   }
 
   /* Export additional types */
