@@ -74,6 +74,11 @@ fastify().get(
   }
 )
 
+fastify().post('/', { decompression: true }, (req, reply) => { reply.send(req.body) })
+fastify().post('/', { decompression: false }, (req, reply) => { reply.send(req.body) })
+fastify().post('/', { decompression: { compressedLimit: 100, decompressedLimit: 100 } }, (req, reply) => { reply.send(req.body) })
+fastify().post('/', { decompression: { decompressedLimit: 100 } }, (req, reply) => { reply.send(req.body) })
+
 type LowerCaseHTTPMethods = 'delete' | 'get' | 'head' | 'patch' | 'post' | 'put' |
   'options' | 'query' | 'propfind' | 'proppatch' | 'mkcol' | 'copy' | 'move' | 'lock' |
   'unlock' | 'trace' | 'search' | 'mkcalendar' | 'report'

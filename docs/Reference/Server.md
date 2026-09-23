@@ -18,6 +18,7 @@ describes the properties available in that options object.
   - [`maxRequestsPerSocket`](#maxrequestspersocket)
   - [`requestTimeout`](#requesttimeout)
   - [`bodyLimit`](#bodylimit)
+  - [`requestDecompression`](#requestdecompression)
   - [`onProtoPoisoning`](#onprotopoisoning)
   - [`onConstructorPoisoning`](#onconstructorpoisoning)
   - [`logger`](#logger)
@@ -299,6 +300,96 @@ The default body reader sends [`FST_ERR_CTP_BODY_TOO_LARGE`](./Errors.md#fst_err
 reply, if the size of the body exceeds this limit.
 If [`preParsing` hook](./Hooks.md#preparsing) is provided, this limit is applied
 to the size of the stream the hook returns (i.e. the size of "decoded" body).
+
+### `requestDecompression`
+<a id="factory-request-decompression"></a>
+
++ Default: `false` (disabled)
+
+Enables transparent decompression of request bodies carried with a
+`Content-Encoding: gzip` header. The option accepts `false` (default, the
+feature is off and requests are processed exactly as before), `true`
+(enabled without explicit limits) or an object with the following
+properties, both non-negative integers counted in bytes:
+
+- `compressedLimit`: maximum number of compressed (still encoded) bytes
+  accepted, counted as they actually flow in from the socket. The
+  `Content-Length` header is not trusted for this check.
+- `decompressedLimit`: maximum number of decompressed bytes accepted.
+
+An omitted limit is unbounded. When either limit is exceeded the request
+fails immediately with a `413` (`FST_ERR_CTP_BODY_TOO_LARGE`) response and
+the pipeline is stopped: `preValidation`, `preHandler` and the route handler
+are never entered. Unknown or multi-layer `Content-Encoding` values are
+rejected with `415` (`FST_ERR_CTP_INVALID_CONTENT_ENCODING`), while corrupt,
+truncated or CRC-invalid gzip bodies fail with `400`
+(`FST_ERR_CTP_INVALID_GZIP_BODY`). Only a single `gzip` encoding or
+`identity` is accepted.
+
+The decompressed stream is fed into the regular content-type parser and
+schema validation, so handlers receive the plain parsed body. The
+`compressedLimit` does not replace [`bodyLimit`](#bodylimit): `bodyLimit`
+still applies to the decompressed parser input, exactly as it does for
+unencoded bodies. In short:
+
+- `compressedLimit` bounds the encoded bytes read from the socket.
+- `decompressedLimit` bounds the decoded bytes produced by gunzip.
+- `bodyLimit` bounds what the content-type parser may consume of the
+  decoded body.
+
+The setting follows the Fastify encapsulation scope: routes registered in
+an encapsulated context inherit the instance option of that context, and
+each route can override or disable it with its own
+[`decompression`](./Routes.md#routes-options) route option. If the client
+aborts the request mid-stream, the decompression chain (including the zlib
+resources) is torn down without producing an additional reply, and the
+connection reuse follows the existing request error policy.
+
+```js
+const fastify = Fastify({
+  requestDecompression: {
+    compressedLimit: 1024 * 1024, // 1 MiB of gzip data
+    decompressedLimit: 1024 // 1 KiB once inflated
+  }
+})
+
+fastify.post('/', (request, reply) => {
+  reply.send({ received: request.body })
+})
+```
+
+A complete local round trip can be exercised in a few seconds with the
+following snippet (run it with `node example.js`, it starts the server,
+sends a locally generated gzip body and prints the response):
+
+```js
+const zlib = require('node:zlib')
+const Fastify = require('fastify')
+
+const fastify = Fastify({
+  requestDecompression: { compressedLimit: 1048576, decompressedLimit: 1024 }
+})
+fastify.post('/', (request, reply) => reply.send({ received: request.body }))
+
+async function main () {
+  await fastify.listen({ port: 0 })
+  const { port } = fastify.server.address()
+
+  // a small gzip body that inflates past the 1024 bytes decompressed limit
+  const payload = zlib.gzipSync(JSON.stringify({ pad: 'x'.repeat(2048) }))
+
+  const res = await fetch(`http://127.0.0.1:${port}/`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'content-encoding': 'gzip' },
+    body: payload
+  })
+  console.log(res.status, await res.text()) // 413 Payload Too Large
+
+  await fastify.close()
+}
+
+main()
+```
 
 ### `onProtoPoisoning`
 <a id="factory-on-proto-poisoning"></a>
@@ -2369,6 +2460,7 @@ The properties that can currently be exposed are:
 - keepAliveTimeout
 - handlerTimeout
 - bodyLimit
+- requestDecompression
 - caseSensitive
 - http2
 - https (it will return `false`/`true` or `{ allowHTTP1: true/false }` if

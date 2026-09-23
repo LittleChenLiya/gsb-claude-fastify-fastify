@@ -124,6 +124,12 @@ expect(fastify({ forceCloseConnections: true })).type.toBeAssignableTo<FastifyIn
 expect(fastify({ keepAliveTimeout: 1000 })).type.toBeAssignableTo<FastifyInstance>()
 expect(fastify({ pluginTimeout: 1000 })).type.toBeAssignableTo<FastifyInstance>()
 expect(fastify({ bodyLimit: 100 })).type.toBeAssignableTo<FastifyInstance>()
+expect(fastify({ requestDecompression: true })).type.toBeAssignableTo<FastifyInstance>()
+expect(fastify({ requestDecompression: false })).type.toBeAssignableTo<FastifyInstance>()
+expect(fastify({
+  requestDecompression: { compressedLimit: 100, decompressedLimit: 100 }
+})).type.toBeAssignableTo<FastifyInstance>()
+expect(fastify({ requestDecompression: { compressedLimit: 100 } })).type.toBeAssignableTo<FastifyInstance>()
 expect(fastify({ handlerTimeout: 5000 })).type.toBeAssignableTo<FastifyInstance>()
 expect(fastify({ maxParamLength: 100 })).type.toBeAssignableTo<FastifyInstance>()
 expect(fastify({ onProtoPoisoning: 'error' })).type.toBeAssignableTo<FastifyInstance>()

@@ -115,6 +115,15 @@ fastify.route(options)
   larger than this number of bytes. Must be an integer. You may also set this
   option globally when first creating the Fastify instance with
   `fastify(options)`. Defaults to `1048576` (1 MiB).
+* `decompression`: enables gzip request body decompression for this
+  route, following the Fastify encapsulation scope. Accepts `false`
+  (disabled), `true` (enabled, inheriting the limits of the encapsulation
+  context) or an object with non-negative integer `compressedLimit` and
+  `decompressedLimit` properties. When omitted, the
+  [`requestDecompression`](./Server.md#requestdecompression) instance option
+  of the route's encapsulation context applies. See
+  [`requestDecompression`](./Server.md#requestdecompression) for the full
+  behavior and how these limits relate to `bodyLimit`.
 * `handlerTimeout`: maximum number of milliseconds for the route's full
   lifecycle. Overrides the server-level
   [`handlerTimeout`](./Server.md#factory-handler-timeout). Must be a positive

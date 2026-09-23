@@ -27,7 +27,7 @@ import { FastifyPluginAsync, FastifyPluginCallback, FastifyPluginOptions } from 
 import { FastifyRegister, FastifyRegisterOptions, RegisterOptions } from './types/register'
 import { FastifyReply } from './types/reply'
 import { FastifyRequest, RequestGenericInterface } from './types/request'
-import { RouteGenericInterface, RouteHandler, RouteHandlerMethod, RouteOptions, RouteShorthandMethod, RouteShorthandOptions, RouteShorthandOptionsWithHandler } from './types/route'
+import { FastifyRequestDecompressionOptions, RouteGenericInterface, RouteHandler, RouteHandlerMethod, RouteOptions, RouteShorthandMethod, RouteShorthandOptions, RouteShorthandOptionsWithHandler } from './types/route'
 import { FastifySchema, FastifySchemaCompiler, FastifySchemaValidationError, FastifySerializerCompiler, SchemaErrorDataVar, SchemaErrorFormatter } from './types/schema'
 import { FastifyServerFactory, FastifyServerFactoryHandler } from './types/server-factory'
 import { FastifyTypeProvider, FastifyTypeProviderDefault, SafePromiseLike } from './types/type-provider'
@@ -133,6 +133,7 @@ declare namespace fastify {
     pluginTimeout?: number,
     bodyLimit?: number,
     handlerTimeout?: number,
+    requestDecompression?: boolean | FastifyRequestDecompressionOptions,
     maxParamLength?: number,
     logController?: LogControllerClass,
     exposeHeadRoutes?: boolean,

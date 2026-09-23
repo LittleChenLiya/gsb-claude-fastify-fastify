@@ -34,6 +34,7 @@ const {
   kGenReqId,
   kErrorHandlerAlreadySet,
   kHandlerTimeout,
+  kRequestDecompression,
   kLogController
 } = require('./lib/symbols.js')
 
@@ -49,6 +50,7 @@ const { createChildLogger, defaultChildLoggerFactory, createLogger, createLogCon
 const pluginUtils = require('./lib/plugin-utils.js')
 const { getGenReqId, reqIdGenFactory } = require('./lib/req-id-gen-factory.js')
 const { buildRouting, validateBodyLimitOption, buildRouterOptions } = require('./lib/route')
+const { normalizeDecompressionOption } = require('./lib/request-decompression.js')
 const build404 = require('./lib/four-oh-four')
 const getSecuredInitialConfig = require('./lib/initial-config-validation.js')
 const override = require('./lib/plugin-override')
@@ -152,6 +154,7 @@ function fastify (serverOptions) {
     [kServerBindings]: [],
     [kBodyLimit]: options.bodyLimit,
     [kHandlerTimeout]: options.handlerTimeout,
+    [kRequestDecompression]: options.requestDecompression,
     [kRoutePrefix]: '',
     [kLogLevel]: '',
     [kLogSerializers]: null,
@@ -914,6 +917,10 @@ function processOptions (options, defaultRoute, onBadUrl, onMaxParamLength) {
   })
 
   const initialConfig = getSecuredInitialConfig(options)
+
+  // Normalize after the initial config validation so the raw user value is
+  // the one validated and exposed through initialConfig.
+  options.requestDecompression = normalizeDecompressionOption(options.requestDecompression)
 
   // exposeHeadRoutes have its default set from the validator
   options.exposeHeadRoutes = initialConfig.exposeHeadRoutes

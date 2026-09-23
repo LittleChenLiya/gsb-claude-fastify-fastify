@@ -307,6 +307,10 @@ type InitialConfig = Readonly<{
   connectionTimeout?: number,
   keepAliveTimeout?: number,
   bodyLimit?: number,
+  requestDecompression?: boolean | Readonly<{
+    compressedLimit?: number,
+    decompressedLimit?: number
+  }>,
   caseSensitive?: boolean,
   allowUnsafeRegex?: boolean,
   forceCloseConnections?: boolean,

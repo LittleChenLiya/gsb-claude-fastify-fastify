@@ -30,6 +30,17 @@ export interface FastifyRouteConfig {
   method: HTTPMethods | HTTPMethods[];
 }
 
+/**
+ * Limits applied when request decompression is enabled. Both limits are
+ * non-negative integers counted in bytes; an omitted limit is unbounded.
+ */
+export interface FastifyRequestDecompressionOptions {
+  // Maximum number of compressed (still encoded) body bytes accepted.
+  compressedLimit?: number;
+  // Maximum number of decompressed body bytes accepted.
+  decompressedLimit?: number;
+}
+
 export interface RouteGenericInterface extends RequestGenericInterface, ReplyGenericInterface { }
 
 export type RouteConstraintType = Omit<ConstraintStrategy<any>, 'deriveConstraint'> & {
@@ -66,6 +77,7 @@ export interface RouteShorthandOptions<
   serializerCompiler?: FastifySerializerCompiler<NoInfer<SchemaCompiler>>;
   bodyLimit?: number;
   handlerTimeout?: number;
+  decompression?: boolean | FastifyRequestDecompressionOptions;
   logLevel?: LogLevel;
   config?: FastifyContextConfig & ContextConfig;
   constraints?: RouteConstraint,

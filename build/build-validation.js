@@ -68,6 +68,19 @@ const schema = {
     requestTimeout: { type: 'integer', default: defaultInitOptions.requestTimeout },
     handlerTimeout: { type: 'integer', default: defaultInitOptions.handlerTimeout },
     bodyLimit: { type: 'integer', default: defaultInitOptions.bodyLimit },
+    requestDecompression: {
+      anyOf: [
+        { type: 'boolean' },
+        {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            compressedLimit: { type: 'integer', minimum: 0 },
+            decompressedLimit: { type: 'integer', minimum: 0 }
+          }
+        }
+      ]
+    },
     http2: { type: 'boolean' },
     https: {
       if: {

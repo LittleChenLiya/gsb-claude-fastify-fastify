@@ -5,7 +5,7 @@ const errors = require('../../lib/errors')
 const { readFileSync } = require('node:fs')
 const { resolve } = require('node:path')
 
-const expectedErrors = 95
+const expectedErrors = 98
 
 test(`should expose ${expectedErrors} errors`, t => {
   t.plan(1)
@@ -178,6 +178,26 @@ test('FST_ERR_CTP_INVALID_CONTENT_LENGTH', t => {
   t.assert.strictEqual(error.message, 'Request body size did not match Content-Length')
   t.assert.strictEqual(error.statusCode, 400)
   t.assert.ok(error instanceof RangeError)
+})
+
+test('FST_ERR_CTP_INVALID_CONTENT_ENCODING', t => {
+  t.plan(5)
+  const error = new errors.FST_ERR_CTP_INVALID_CONTENT_ENCODING('br')
+  t.assert.strictEqual(error.name, 'FastifyError')
+  t.assert.strictEqual(error.code, 'FST_ERR_CTP_INVALID_CONTENT_ENCODING')
+  t.assert.strictEqual(error.message, "Unsupported Content-Encoding 'br'. Only a single 'gzip' or 'identity' encoding is supported.")
+  t.assert.strictEqual(error.statusCode, 415)
+  t.assert.ok(error instanceof Error)
+})
+
+test('FST_ERR_CTP_INVALID_GZIP_BODY', t => {
+  t.plan(5)
+  const error = new errors.FST_ERR_CTP_INVALID_GZIP_BODY()
+  t.assert.strictEqual(error.name, 'FastifyError')
+  t.assert.strictEqual(error.code, 'FST_ERR_CTP_INVALID_GZIP_BODY')
+  t.assert.strictEqual(error.message, 'The request body is not a valid gzip stream.')
+  t.assert.strictEqual(error.statusCode, 400)
+  t.assert.ok(error instanceof Error)
 })
 
 test('FST_ERR_CTP_EMPTY_JSON_BODY', t => {
@@ -766,6 +786,16 @@ test('FST_ERR_ROUTE_BODY_LIMIT_OPTION_NOT_INT', t => {
   t.assert.strictEqual(error.name, 'FastifyError')
   t.assert.strictEqual(error.code, 'FST_ERR_ROUTE_BODY_LIMIT_OPTION_NOT_INT')
   t.assert.strictEqual(error.message, "'bodyLimit' option must be an integer > 0. Got '%s'")
+  t.assert.strictEqual(error.statusCode, 500)
+  t.assert.ok(error instanceof TypeError)
+})
+
+test('FST_ERR_ROUTE_DECOMPRESSION_OPTION_INVALID', t => {
+  t.plan(5)
+  const error = new errors.FST_ERR_ROUTE_DECOMPRESSION_OPTION_INVALID()
+  t.assert.strictEqual(error.name, 'FastifyError')
+  t.assert.strictEqual(error.code, 'FST_ERR_ROUTE_DECOMPRESSION_OPTION_INVALID')
+  t.assert.strictEqual(error.message, "The 'decompression' option must be a boolean or an object with non-negative integer 'compressedLimit' and 'decompressedLimit' properties. Got '%s'")
   t.assert.strictEqual(error.statusCode, 500)
   t.assert.ok(error instanceof TypeError)
 })

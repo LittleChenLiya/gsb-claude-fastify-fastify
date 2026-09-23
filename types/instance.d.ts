@@ -695,6 +695,10 @@ export interface FastifyInstance<
     keepAliveTimeout?: number,
     forceCloseConnections?: boolean,
     bodyLimit?: number,
+    requestDecompression?: boolean | Readonly<{
+      compressedLimit?: number,
+      decompressedLimit?: number
+    }>,
     caseSensitive?: boolean,
     allowUnsafeRegex?: boolean,
     http2?: boolean,
