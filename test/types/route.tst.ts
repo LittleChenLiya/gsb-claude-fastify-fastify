@@ -574,3 +574,29 @@ expect(fastify().route({
     expect(req.routeOptions.method).type.toBeAssignableTo<string | Array<string>>()
   }
 })).type.toBe<FastifyInstance>()
+
+expect(fastify().route({
+  url: '/',
+  method: 'POST',
+  decompressBody: true,
+  handler: routeHandlerWithReturnValue
+})).type.toBe<FastifyInstance>()
+
+expect(fastify().route({
+  url: '/',
+  method: 'POST',
+  decompressBody: { compressedLimit: 1024, decompressedLimit: 2048 },
+  handler: routeHandlerWithReturnValue
+})).type.toBe<FastifyInstance>()
+
+fastify().route({
+  url: '/',
+  method: 'POST',
+  // @ts-expect-error  Type 'string' is not assignable to type 'number'.
+  decompressBody: { compressedLimit: '1024' },
+  handler: routeHandlerWithReturnValue
+})
+
+expect(fastify().post('/', {
+  decompressBody: { decompressedLimit: 1024 }
+}, routeHandlerWithReturnValue)).type.toBe<FastifyInstance>()

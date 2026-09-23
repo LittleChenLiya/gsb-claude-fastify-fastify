@@ -115,6 +115,30 @@ fastify.route(options)
   larger than this number of bytes. Must be an integer. You may also set this
   option globally when first creating the Fastify instance with
   `fastify(options)`. Defaults to `1048576` (1 MiB).
+* `decompressBody`: enables transparent decompression of gzip-encoded request
+  bodies before they reach the content-type parser. Disabled by default; when
+  disabled the request pipeline behaves exactly as before. Accepts `true` or an
+  object with the following limits, both non-negative integers counted in
+  bytes as they actually flow through the socket (the `Content-Length` header
+  is never trusted):
+  * `compressedLimit`: maximum number of compressed (gzipped) input bytes.
+    Defaults to the route's effective `bodyLimit`.
+  * `decompressedLimit`: maximum number of decompressed output bytes.
+    Defaults to the route's effective `bodyLimit`.
+
+  Only a single `gzip` content coding (or `identity`) is accepted: unknown or
+  multi-layer `Content-Encoding` values are rejected with a `415` error,
+  corrupted, truncated, or bad-checksum gzip payloads with a `400` error, and
+  exceeding either limit stops the pipeline immediately with a `413` error.
+  None of these failures enter the `preValidation`/`preHandler` hooks or the
+  route handler. The decompressed bytes are then parsed and validated as usual,
+  so `decompressedLimit` does not replace `bodyLimit`: `bodyLimit` still
+  bounds the decompressed input of the content-type parser, while
+  `compressedLimit` and `decompressedLimit` guard against gzip bombs. Since
+  the option is resolved per route at registration time, it follows Fastify's
+  encapsulation: enabling it inside a plugin does not affect routes registered
+  on the parent instance. See [Request body
+  decompression](#request-body-decompression) for a full example.
 * `handlerTimeout`: maximum number of milliseconds for the route's full
   lifecycle. Overrides the server-level
   [`handlerTimeout`](./Server.md#factory-handler-timeout). Must be a positive
@@ -176,6 +200,77 @@ fastify.route({
     reply.send({ hello: 'world' })
   }
 })
+```
+
+### Request body decompression
+<a id="request-body-decompression"></a>
+
+Routes can opt in to transparent gzip request decompression with the
+`decompressBody` option. The decompressed bytes flow into the regular
+content-type parser and schema validation, so handlers receive the plain
+parsed body. Decompression is disabled by default and routes that do not set
+the option are completely unaffected.
+
+Three independent limits apply, in this order:
+
+1. `compressedLimit` caps the compressed bytes read from the socket.
+2. `decompressedLimit` caps the bytes produced by the decompressor, stopping
+   gzip bombs before they reach your code.
+3. `bodyLimit` still caps the decompressed input of the content-type parser,
+   exactly as it does for uncompressed requests.
+
+All of them are enforced on the bytes actually flowing through the connection,
+never on the `Content-Length` header alone, and exceeding any of them replies
+with a `413` error without invoking `preValidation`, `preHandler`, or the
+route handler.
+
+The following self-contained script exercises the feature locally in a few
+seconds (well under 90): it starts a server, sends a gzipped JSON body, and
+prints the parsed result.
+
+```js
+'use strict'
+
+const zlib = require('node:zlib')
+const fastify = require('fastify')()
+
+fastify.post('/echo', {
+  decompressBody: { compressedLimit: 1024 * 1024, decompressedLimit: 1024 }
+}, async (request) => request.body)
+
+async function main () {
+  await fastify.listen({ port: 0 })
+  const { port } = fastify.server.address()
+
+  const payload = zlib.gzipSync(JSON.stringify({ hello: 'world' }))
+  const response = await fetch(`http://127.0.0.1:${port}/echo`, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'content-encoding': 'gzip'
+    },
+    body: payload
+  })
+
+  console.log(response.status) // 200
+  console.log(await response.json()) // { hello: 'world' }
+
+  // A tiny gzip payload that expands beyond decompressedLimit is a 413:
+  const bomb = zlib.gzipSync(Buffer.alloc(2048))
+  const limited = await fetch(`http://127.0.0.1:${port}/echo`, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'content-encoding': 'gzip'
+    },
+    body: bomb
+  })
+  console.log(limited.status) // 413
+
+  await fastify.close()
+}
+
+main()
 ```
 
 ### Shorthand declaration

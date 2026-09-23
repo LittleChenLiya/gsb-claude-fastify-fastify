@@ -32,6 +32,10 @@
     - [FST_ERR_CTP_EMPTY_JSON_BODY](#fst_err_ctp_empty_json_body)
     - [FST_ERR_CTP_INVALID_JSON_BODY](#fst_err_ctp_invalid_json_body)
     - [FST_ERR_CTP_INSTANCE_ALREADY_STARTED](#fst_err_ctp_instance_already_started)
+    - [FST_ERR_CTP_UNSUPPORTED_CONTENT_ENCODING](#fst_err_ctp_unsupported_content_encoding)
+    - [FST_ERR_CTP_INVALID_GZIP_BODY](#fst_err_ctp_invalid_gzip_body)
+    - [FST_ERR_CTP_COMPRESSED_BODY_TOO_LARGE](#fst_err_ctp_compressed_body_too_large)
+    - [FST_ERR_CTP_DECOMPRESSED_BODY_TOO_LARGE](#fst_err_ctp_decompressed_body_too_large)
     - [FST_ERR_INSTANCE_ALREADY_STARTED](#fst_err_instance_already_started)
     - [FST_ERR_DEC_ALREADY_PRESENT](#fst_err_dec_already_present)
     - [FST_ERR_DEC_DEPENDENCY_INVALID_TYPE](#fst_err_dec_dependency_invalid_type)
@@ -89,6 +93,7 @@
     - [FST_ERR_ROUTE_LOG_LEVEL_INVALID](#fst_err_route_log_level_invalid)
     - [FST_ERR_ROUTE_BODY_VALIDATION_SCHEMA_NOT_SUPPORTED](#fst_err_route_body_validation_schema_not_supported)
     - [FST_ERR_ROUTE_BODY_LIMIT_OPTION_NOT_INT](#fst_err_route_body_limit_option_not_int)
+    - [FST_ERR_ROUTE_DECOMPRESS_BODY_OPTION_INVALID](#fst_err_route_decompress_body_option_invalid)
     - [FST_ERR_HANDLER_TIMEOUT](#fst_err_handler_timeout)
 
     - [FST_ERR_ROUTE_HANDLER_TIMEOUT_OPTION_NOT_INT](#fst_err_route_handler_timeout_option_not_int)
@@ -386,6 +391,10 @@ Below is a table with all the error codes used by Fastify.
 | <a id="fst_err_ctp_empty_json_body">FST_ERR_CTP_EMPTY_JSON_BODY</a> | Body is not valid JSON but content-type is set to <code>application/json</code>. | Check if the request body is valid JSON. | [#5925](https://github.com/fastify/fastify/pull/5925) |
 | <a id="fst_err_ctp_invalid_json_body">FST_ERR_CTP_INVALID_JSON_BODY</a> | Body cannot be empty when content-type is set to <code>application/json</code>. | Check the request body. | [#1253](https://github.com/fastify/fastify/pull/1253) |
 | <a id="fst_err_ctp_instance_already_started">FST_ERR_CTP_INSTANCE_ALREADY_STARTED</a> | Fastify is already started. | - | [#4554](https://github.com/fastify/fastify/pull/4554) |
+| <a id="fst_err_ctp_unsupported_content_encoding">FST_ERR_CTP_UNSUPPORTED_CONTENT_ENCODING</a> | The received <code>Content-Encoding</code> is not supported. Only a single <code>gzip</code> or <code>identity</code> encoding is accepted. | Send the body uncompressed or with a single <code>gzip</code> encoding. | - |
+| <a id="fst_err_ctp_invalid_gzip_body">FST_ERR_CTP_INVALID_GZIP_BODY</a> | The request body is not a valid gzip payload (corrupted, truncated, or invalid checksum). | Check that the request body is a well-formed gzip payload. | - |
+| <a id="fst_err_ctp_compressed_body_too_large">FST_ERR_CTP_COMPRESSED_BODY_TOO_LARGE</a> | The compressed request body is larger than the configured <code>compressedLimit</code>. | Increase the limit in the route's [decompressBody](./Routes.md#decompressbody) option. | - |
+| <a id="fst_err_ctp_decompressed_body_too_large">FST_ERR_CTP_DECOMPRESSED_BODY_TOO_LARGE</a> | The decompressed request body is larger than the configured <code>decompressedLimit</code>. | Increase the limit in the route's [decompressBody](./Routes.md#decompressbody) option. | - |
 | <a id="fst_err_instance_already_started">FST_ERR_INSTANCE_ALREADY_STARTED</a> | Fastify instance is already started. | - | [#6098](https://github.com/fastify/fastify/pull/6098) |
 | <a id="fst_err_dec_already_present">FST_ERR_DEC_ALREADY_PRESENT</a> | A decorator with the same name is already registered. | Use a different decorator name. | [#1168](https://github.com/fastify/fastify/pull/1168) |
 | <a id="fst_err_dec_dependency_invalid_type">FST_ERR_DEC_DEPENDENCY_INVALID_TYPE</a> | The dependencies of decorator must be of type `Array`. | Use an array for the dependencies. | [#3090](https://github.com/fastify/fastify/pull/3090) |
@@ -443,6 +452,7 @@ Below is a table with all the error codes used by Fastify.
 | <a id="fst_err_route_log_level_invalid">FST_ERR_ROUTE_LOG_LEVEL_INVALID</a> | `logLevel` must match a configured logger level. | Use one of the configured logger levels for the route. | [#6523](https://github.com/fastify/fastify/pull/6523) |
 | <a id="fst_err_route_body_validation_schema_not_supported">FST_ERR_ROUTE_BODY_VALIDATION_SCHEMA_NOT_SUPPORTED</a> | Body validation schema route is not supported. | Use a different different method for the route. | [#4554](https://github.com/fastify/fastify/pull/4554) |
 | <a id="fst_err_route_body_limit_option_not_int">FST_ERR_ROUTE_BODY_LIMIT_OPTION_NOT_INT</a> | `bodyLimit` option must be an integer. | Use an integer for the `bodyLimit` option. | [#4554](https://github.com/fastify/fastify/pull/4554) |
+| <a id="fst_err_route_decompress_body_option_invalid">FST_ERR_ROUTE_DECOMPRESS_BODY_OPTION_INVALID</a> | `decompressBody` option must be a boolean or an object with non-negative integer limits. | Use a valid value for the `decompressBody` option. | - |
 | <a id="fst_err_handler_timeout">FST_ERR_HANDLER_TIMEOUT</a> | Request timed out. | Increase the `handlerTimeout` option or optimize the handler. | - |
 | <a id="fst_err_route_handler_timeout_option_not_int">FST_ERR_ROUTE_HANDLER_TIMEOUT_OPTION_NOT_INT</a> | `handlerTimeout` option must be a positive integer. | Use a positive integer for the `handlerTimeout` option. | - |
 | <a id="fst_err_route_rewrite_not_str">FST_ERR_ROUTE_REWRITE_NOT_STR</a> | `rewriteUrl` needs to be of type `string`. | Use a string for the `rewriteUrl`. | [#4554](https://github.com/fastify/fastify/pull/4554) |

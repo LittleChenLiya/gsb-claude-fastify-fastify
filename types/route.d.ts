@@ -48,6 +48,17 @@ export interface RouteConstraint {
  */
 type RouteShorthandHook<T extends (...args: any) => any> = (...args: Parameters<T>) => void | Promise<unknown>
 
+/**
+ * Request body decompression limits. Both limits are non-negative integers
+ * counted in bytes and default to the route's effective `bodyLimit`.
+ */
+export interface DecompressBodyOptions {
+  /** Maximum number of compressed (gzipped) input bytes. */
+  compressedLimit?: number;
+  /** Maximum number of decompressed output bytes. */
+  decompressedLimit?: number;
+}
+
 export interface RouteShorthandOptions<
   RawServer extends RawServerBase = RawServerDefault,
   RawRequest extends RawRequestDefaultExpression<RawServer> = RawRequestDefaultExpression<RawServer>,
@@ -65,6 +76,7 @@ export interface RouteShorthandOptions<
   validatorCompiler?: FastifySchemaCompiler<NoInfer<SchemaCompiler>>;
   serializerCompiler?: FastifySerializerCompiler<NoInfer<SchemaCompiler>>;
   bodyLimit?: number;
+  decompressBody?: boolean | DecompressBodyOptions;
   handlerTimeout?: number;
   logLevel?: LogLevel;
   config?: FastifyContextConfig & ContextConfig;
