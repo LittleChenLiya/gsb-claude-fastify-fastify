@@ -35,6 +35,7 @@ const getHandler: RouteHandlerMethod = function (_request, reply) {
     (hints: Record<string, string | string[]>, callback?: (() => void) | undefined) => void
   >()
   expect(reply.send).type.toBe<((...args: [payload?: unknown]) => FastifyReply)>()
+  expect(reply.trySend).type.toBe<((...args: [payload?: unknown]) => boolean)>()
   expect(reply.header).type.toBeAssignableTo<(key: string, value: any) => FastifyReply>()
   expect(reply.headers).type.toBeAssignableTo<(values: { [key: string]: any }) => FastifyReply>()
   expect(reply.getHeader).type.toBeAssignableTo<(key: string) => number | string | string[] | undefined>()

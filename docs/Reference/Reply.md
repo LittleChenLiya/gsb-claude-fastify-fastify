@@ -29,6 +29,7 @@
   - [.sent](#sent)
   - [.hijack()](#hijack)
   - [.send(data)](#senddata)
+  - [.trySend(data)](#trysenddata)
     - [Objects](#objects)
     - [Strings](#strings)
     - [Streams](#streams)
@@ -87,6 +88,10 @@ since the request was received by Fastify.
 - `.serializer(function)` - Sets a custom serializer for the payload.
 - `.send(payload)` - Sends the payload to the user, could be a plain text, a
   buffer, JSON, stream, or an Error object.
+- `.trySend(payload)` - Like `.send(payload)`, but atomically claims the
+  reply first: returns `true` to the branch that won the claim and `false`
+  to every later call, without running serialization or the `onSend` hooks
+  more than once.
 - `.sent` - A boolean value that you can use if you need to know if `send` has
   already been called.
 - `.hijack()` - interrupt the normal request lifecycle.
@@ -997,6 +1002,31 @@ fastify.get('/botnet', async function (request, reply) {
 
 If you want to know more please review
 [Routes#async-await](./Routes.md#async-await).
+
+### .trySend(data)
+<a id="trysend"></a>
+
+`.trySend(payload)` accepts the same payloads as [`.send(data)`](#senddata)
+and sends them through the exact same pipeline, but it first atomically
+claims the reply for the current request, before serialization and the
+`onSend` hooks run. It returns `true` when the claim was acquired and the
+payload is being sent, and `false` when the reply was already claimed, sent,
+or hijacked. This makes it safe to race multiple asynchronous branches that
+may each produce a response: only the first branch to call `.trySend()`
+triggers serialization, the `onSend` hooks, and the response itself, while
+every other branch observes `false` and can skip its own side effects.
+
+```js
+fastify.get('/', function (request, reply) {
+  raceSources().forEach(source => {
+    source.then(value => {
+      // Only the fastest source sends a response; the others get false.
+      reply.trySend(value)
+    })
+  })
+  return reply
+})
+```
 
 ### .then(fulfilled, rejected)
 <a id="then"></a>

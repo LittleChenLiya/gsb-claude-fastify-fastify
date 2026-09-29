@@ -53,6 +53,7 @@ export interface FastifyReply<
   sent: boolean;
   send(...args: SendArgs<ReplyType>): FastifyReply<RouteGeneric, RawServer, RawRequest, RawReply, ContextConfig,
     SchemaCompiler, TypeProvider>;
+  trySend(...args: SendArgs<ReplyType>): boolean;
   header(key: HttpHeader, value: any): FastifyReply<RouteGeneric, RawServer, RawRequest, RawReply, ContextConfig,
     SchemaCompiler, TypeProvider>;
   headers(values: Partial<Record<HttpHeader, number | string | string[] | undefined>>): FastifyReply<RouteGeneric,
