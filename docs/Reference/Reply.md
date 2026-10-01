@@ -39,6 +39,7 @@
     - [Errors](#errors)
     - [Type of the final payload](#type-of-the-final-payload)
     - [Async-Await and Promises](#async-await-and-promises)
+  - [.trySend(data)](#trysenddata)
   - [.then(fulfilled, rejected)](#thenfulfilled-rejected)
 
 ### Introduction
@@ -87,6 +88,9 @@ since the request was received by Fastify.
 - `.serializer(function)` - Sets a custom serializer for the payload.
 - `.send(payload)` - Sends the payload to the user, could be a plain text, a
   buffer, JSON, stream, or an Error object.
+- `.trySend(payload)` - Sends the payload only if no other send pipeline has
+  been started for this reply, returning `true` when the payload is being
+  sent and `false` otherwise.
 - `.sent` - A boolean value that you can use if you need to know if `send` has
   already been called.
 - `.hijack()` - interrupt the normal request lifecycle.
@@ -997,6 +1001,34 @@ fastify.get('/botnet', async function (request, reply) {
 
 If you want to know more please review
 [Routes#async-await](./Routes.md#async-await).
+
+### .trySend(data)
+<a id="trysend"></a>
+
+`.trySend()` behaves like [`.send()`](#senddata), but it claims the reply
+synchronously, before serialization and the `onSend` hooks run, and only the
+call that wins the race is allowed to trigger those side effects. It returns
+`true` when this call claimed the reply and the payload is being sent, and
+`false` when the reply was already claimed by a previous `send()`/`trySend()`
+call or has already been sent.
+
+This is useful when multiple asynchronous branches of your business logic may
+produce a response for the same request concurrently, and only the first
+result should be delivered:
+
+```js
+fastify.get('/', function (request, reply) {
+  fetchFromCache(request).then((payload) => reply.trySend(payload))
+  fetchFromOrigin(request).then((payload) => reply.trySend(payload))
+})
+```
+
+In the example above, the faster branch sends its payload, while the slower
+one gets `false` and can skip any further work. Serialization and the `onSend`
+hooks run at most once, and only a single response is produced.
+
+If serialization of the winning payload fails, the configured error handler
+is invoked as usual, exactly as it would be for `.send()`.
 
 ### .then(fulfilled, rejected)
 <a id="then"></a>
