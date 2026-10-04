@@ -1,0 +1,4 @@
+{
+  "http://example.com/user-v1": { "$id": "http://example.com/user-v1", "type": "object", "properties": { "name": { "type": "string" } } },
+  "http://example.com/user-v2": { "$id": "http://example.com/user-v2", "type": "object", "required": ["name"], "properties": { "name": { "type": "string" } } }
+}
