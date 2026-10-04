@@ -72,6 +72,8 @@
     - [FST_ERR_SCH_VALIDATION_BUILD](#fst_err_sch_validation_build)
     - [FST_ERR_SCH_SERIALIZATION_BUILD](#fst_err_sch_serialization_build)
     - [FST_ERR_SCH_RESPONSE_SCHEMA_NOT_NESTED_2XX](#fst_err_sch_response_schema_not_nested_2xx)
+    - [FST_ERR_PROJECTION_INVALID](#fst_err_projection_invalid)
+    - [FST_ERR_PROJECTION_AMBIGUOUS](#fst_err_projection_ambiguous)
     - [FST_ERR_INIT_OPTS_INVALID](#fst_err_init_opts_invalid)
     - [FST_ERR_FORCE_CLOSE_CONNECTIONS_IDLE_NOT_AVAILABLE](#fst_err_force_close_connections_idle_not_available)
     - [FST_ERR_DUPLICATED_ROUTE](#fst_err_duplicated_route)
@@ -426,6 +428,8 @@ Below is a table with all the error codes used by Fastify.
 | <a id="fst_err_sch_validation_build">FST_ERR_SCH_VALIDATION_BUILD</a> | The JSON schema provided for validation to a route is not valid. | Fix the JSON schema. | [#2023](https://github.com/fastify/fastify/pull/2023) |
 | <a id="fst_err_sch_serialization_build">FST_ERR_SCH_SERIALIZATION_BUILD</a> | The JSON schema provided for serialization of a route response is not valid. | Fix the JSON schema. | [#2023](https://github.com/fastify/fastify/pull/2023) |
 | <a id="fst_err_sch_response_schema_not_nested_2xx">FST_ERR_SCH_RESPONSE_SCHEMA_NOT_NESTED_2XX</a> | Response schemas should be nested under a valid status code (2XX). | Use a valid status code. | [#4554](https://github.com/fastify/fastify/pull/4554) |
+| <a id="fst_err_projection_invalid">FST_ERR_PROJECTION_INVALID</a> | The response projection configuration of a route is not valid. | Fix the `projection` route option. | - |
+| <a id="fst_err_projection_ambiguous">FST_ERR_PROJECTION_AMBIGUOUS</a> | A response projection path crosses an ambiguous schema combinator (`oneOf`/`anyOf`/`if`-`then`-`else`/`not`) and its branch cannot be uniquely determined. | Remove the path, change the schema, or set the explicit `onAmbiguous: "redact-subtree"` strategy. | - |
 | <a id="fst_err_init_opts_invalid">FST_ERR_INIT_OPTS_INVALID</a> | Invalid initialization options. | Use valid initialization options. | [#1471](https://github.com/fastify/fastify/pull/1471) |
 | <a id="fst_err_force_close_connections_idle_not_available">FST_ERR_FORCE_CLOSE_CONNECTIONS_IDLE_NOT_AVAILABLE</a> | Cannot set forceCloseConnections to `idle` as your HTTP server does not support `closeIdleConnections` method. | Use a different value for `forceCloseConnections`. | [#3925](https://github.com/fastify/fastify/pull/3925) |
 | <a id="fst_err_duplicated_route">FST_ERR_DUPLICATED_ROUTE</a> | The HTTP method already has a registered controller for that URL. | Use a different URL or register the controller for another HTTP method. | [#2954](https://github.com/fastify/fastify/pull/2954) |

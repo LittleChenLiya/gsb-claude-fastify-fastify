@@ -111,6 +111,9 @@ fastify.route(options)
   Serialization](./Validation-and-Serialization.md#error-handling)
   documentation. Overrides the global schema error formatter handler, and
   anything set by `setSchemaErrorFormatter`, for requests to the route.
+* `projection`: object that configures the response projection, removing or
+  replacing sensitive fields of the response payload before serialization.
+  See the [Response Projection](./Response-Projection.md) documentation.
 * `bodyLimit`: prevents the default JSON body parser from parsing request bodies
   larger than this number of bytes. Must be an integer. You may also set this
   option globally when first creating the Fastify instance with

@@ -20,6 +20,8 @@ concepts, ordered by likely importance to the reader:
 + [Validation and Serialization](./Validation-and-Serialization.md): Details
   Fastify's support for validating incoming data and how Fastify serializes data
   for responses.
++ [Response Projection](./Response-Projection.md): Details how to remove or
+  replace sensitive response fields per route before serialization.
 + [Plugins](./Plugins.md): Explains Fastify's plugin architecture and API.
 + [Encapsulation](./Encapsulation.md): Explains a core concept upon which all
   Fastify plugins are built.
@@ -67,5 +69,7 @@ This table of contents is in alphabetical order.
 + [Validation and Serialization](./Validation-and-Serialization.md): Details
   Fastify's support for validating incoming data and how Fastify serializes data
   for responses.
++ [Response Projection](./Response-Projection.md): Details how to remove or
+  replace sensitive response fields per route before serialization.
 + [Warnings](./Warnings.md): Details the warnings Fastify emits and how to
   solve them.

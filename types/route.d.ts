@@ -44,6 +44,29 @@ export interface RouteConstraint {
 }
 
 /**
+ * A single sensitive path of a response projection. The path uses dot
+ * notation, `[*]` (or a bare `*`) selects every item of an array,
+ * e.g. `users[*].token`.
+ */
+export interface ResponseProjectionPath {
+  path: string
+  action?: 'remove' | 'replace'
+  replacement?: unknown
+}
+
+/**
+ * Response projection configuration: removes or replaces sensitive fields
+ * of the response payload before serialization, without mutating the object
+ * returned by the route handler.
+ */
+export interface ResponseProjection {
+  paths: (string | ResponseProjectionPath)[]
+  action?: 'remove' | 'replace'
+  replacement?: unknown
+  onAmbiguous?: 'error' | 'redact-subtree'
+}
+
+/**
  * Route shorthand options for the various shorthand methods
  */
 type RouteShorthandHook<T extends (...args: any) => any> = (...args: Parameters<T>) => void | Promise<unknown>
@@ -67,6 +90,7 @@ export interface RouteShorthandOptions<
   bodyLimit?: number;
   handlerTimeout?: number;
   logLevel?: LogLevel;
+  projection?: ResponseProjection;
   config?: FastifyContextConfig & ContextConfig;
   constraints?: RouteConstraint,
   prefixTrailingSlash?: 'slash' | 'no-slash' | 'both';

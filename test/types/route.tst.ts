@@ -574,3 +574,21 @@ expect(fastify().route({
     expect(req.routeOptions.method).type.toBeAssignableTo<string | Array<string>>()
   }
 })).type.toBe<FastifyInstance>()
+
+expect(fastify().route({
+  url: '/projection',
+  method: 'GET',
+  projection: {
+    paths: ['users[*].token', { path: 'meta.secret', action: 'replace', replacement: '***' }],
+    action: 'remove',
+    onAmbiguous: 'redact-subtree'
+  },
+  handler: () => ({})
+})).type.toBe<FastifyInstance>()
+
+expect(fastify().route).type.not.toBeCallableWith({
+  url: '/projection',
+  method: 'GET',
+  projection: { paths: ['users[*].token'], action: 'drop' },
+  handler: () => ({})
+})
