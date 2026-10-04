@@ -60,6 +60,9 @@ This table of contents is in alphabetical order.
   each request handler.
 + [Routes](./Routes.md): Details how to register routes with Fastify and how
   Fastify builds and evaluates the routing trie.
++ [Schema Compatibility](./Schema-Compatibility.md): Documents the offline
+  checker that finds inputs accepted by an old route schema but rejected by a
+  new one before a schema upgrade is deployed.
 + [Server](./Server.md): Documents the core Fastify API. Includes documentation
   for the factory function and the object returned by the factory function.
 + [TypeScript](./TypeScript.md): Documents Fastify's TypeScript support and
