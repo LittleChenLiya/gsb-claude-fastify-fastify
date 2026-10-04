@@ -13,6 +13,29 @@ export interface FastifySchema {
   params?: unknown;
   headers?: unknown;
   response?: unknown;
+  /**
+   * Explicit sensitive path rules for response field projection, e.g.
+   * `['users[*].token']`. Sensitive fields are removed (or replaced) from
+   * the response payload before it is serialized and sent. The handler's
+   * returned object is never mutated.
+   */
+  sensitive?: readonly (string | FastifySensitivePathRule)[];
+  /**
+   * Strategy used when a response schema branch (oneOf/anyOf/if/then/else/
+   * not/dependentSchemas) contains sensitive fields:
+   * - `'strict'` (default): the route build fails with an error, because the
+   *   branch cannot be guessed without risking a leak.
+   * - `'union'`: the union of all branches is projected (may over-redact, but
+   *   never leaks).
+   */
+  sensitiveStrategy?: 'strict' | 'union';
+}
+
+export interface FastifySensitivePathRule {
+  /** Path to the sensitive field, e.g. `users[*].token`. */
+  path: string;
+  /** Replacement value. When omitted the field is removed. */
+  replace?: unknown;
 }
 
 export interface FastifyRouteSchemaDef<T> {
