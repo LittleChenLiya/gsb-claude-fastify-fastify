@@ -131,6 +131,7 @@ declare namespace fastify {
     forceCloseConnections?: boolean | 'idle',
     requestTimeout?: number,
     pluginTimeout?: number,
+    sealPluginConfig?: boolean,
     bodyLimit?: number,
     handlerTimeout?: number,
     maxParamLength?: number,

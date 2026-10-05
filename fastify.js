@@ -52,6 +52,7 @@ const { buildRouting, validateBodyLimitOption, buildRouterOptions } = require('.
 const build404 = require('./lib/four-oh-four')
 const getSecuredInitialConfig = require('./lib/initial-config-validation.js')
 const override = require('./lib/plugin-override')
+const { wrapPluginForSealing } = require('./lib/sealed-config.js')
 const {
   appendStackTrace,
   AVVIO_ERRORS_MAP,
@@ -378,6 +379,16 @@ function fastify (serverOptions) {
   fastify[kAvvioBoot] = fastify.ready // the avvio ready function
   fastify.ready = ready // overwrite the avvio ready function
   fastify.printPlugins = avvio.prettyPrint.bind(avvio)
+
+  // When explicit read-only config sealing is enabled, wrap `register` so
+  // that every plugin receives its scope's sealed snapshot instead of the
+  // raw options object. The normal register signature is unchanged.
+  if (options.sealPluginConfig === true) {
+    const originalRegister = fastify.register.bind(fastify)
+    fastify.register = function register (plugin, opts) {
+      return originalRegister(wrapPluginForSealing(plugin), opts)
+    }
+  }
 
   // cache the closing value, since we are checking it in an hot path
   avvio.once('preReady', () => {
@@ -1007,3 +1018,6 @@ module.exports.errorCodes = errorCodes
 module.exports.LogController = LogController
 module.exports.fastify = fastify
 module.exports.default = fastify
+module.exports.getConfigSource = require('./lib/sealed-config.js').getConfigSource
+module.exports.getConfigSourceChain = require('./lib/sealed-config.js').getConfigSourceChain
+module.exports.isSealedConfig = require('./lib/sealed-config.js').isSealedConfig

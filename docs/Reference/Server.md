@@ -28,6 +28,7 @@ describes the properties available in that options object.
   - [`genReqId`](#genreqid)
   - [`trustProxy`](#trustproxy)
   - [`pluginTimeout`](#plugintimeout)
+  - [`sealPluginConfig`](#seal-plugin-config)
   - [`exposeHeadRoutes`](#exposeheadroutes)
   - [`return503OnClosing`](#return503onclosing)
   - [`ajv`](#ajv)
@@ -616,6 +617,44 @@ The maximum amount of time in *milliseconds* in which a plugin can load. If not,
 [`ready`](#ready) will complete with an `Error` with code
 `'ERR_AVVIO_PLUGIN_TIMEOUT'`. When set to `0`, disables this check. This
 controls [avvio](https://www.npmjs.com/package/avvio) 's `timeout` parameter.
+
+### `sealPluginConfig`
+<a id="seal-plugin-config"></a>
+
++ Default: `false`
+
+When set to `true`, every plugin receives a read-only sealed snapshot of its
+options instead of the raw options object. The snapshot is frozen recursively
+and is independent of the original caller object: mutating the caller object
+after registration has no effect on the sealed config.
+
+Parent scopes pass an independent snapshot to child scopes. A child may
+override a key without mutating the parent's snapshot. Functions are kept by
+reference (they are never invoked) and circular references keep their shared
+identity.
+
+The source scope of every key is recorded along the scope chain. It can be
+queried with `getConfigSource` and `getConfigSourceChain`, which return scope
+names (strings) rather than values, so the source chain never leaks
+configuration values.
+
+```js
+const fastify = require('fastify')({
+  sealPluginConfig: true
+})
+
+fastify.register(function parent (instance, opts, done) {
+  // opts is a frozen snapshot: { nested: { x: 1 } }
+  instance.register(function child (instance, opts, done) {
+    // opts inherits the parent snapshot, with nested.x overridden to 2
+    done()
+  }, { nested: { x: 2 } })
+  done()
+}, { nested: { x: 1 } })
+```
+
+See the [sealed config example](../../examples/sealed-config.js) for a full
+usage example.
 
 ### `querystringParser`
 <a id="factory-querystring-parser"></a>
@@ -2376,6 +2415,7 @@ The properties that can currently be exposed are:
 - onProtoPoisoning
 - onConstructorPoisoning
 - pluginTimeout
+- sealPluginConfig
 - requestIdHeader
 - http2SessionTimeout
 - routerOptions
