@@ -34,7 +34,9 @@ const {
   kGenReqId,
   kErrorHandlerAlreadySet,
   kHandlerTimeout,
-  kLogController
+  kLogController,
+  kSealedConfig,
+  kSealedConfigSources
 } = require('./lib/symbols.js')
 
 const { createServer } = require('./lib/server')
@@ -52,6 +54,7 @@ const { buildRouting, validateBodyLimitOption, buildRouterOptions } = require('.
 const build404 = require('./lib/four-oh-four')
 const getSecuredInitialConfig = require('./lib/initial-config-validation.js')
 const override = require('./lib/plugin-override')
+const { sealConfig, kSealedConfigInput } = require('./lib/config-sealer.js')
 const {
   appendStackTrace,
   AVVIO_ERRORS_MAP,
@@ -172,6 +175,8 @@ function fastify (serverOptions) {
     [kFourOhFour]: fourOhFour,
     [pluginUtils.kRegisteredPlugins]: [],
     [kPluginNameChain]: ['fastify'],
+    [kSealedConfig]: null,
+    [kSealedConfigSources]: [],
     [kAvvioBoot]: null,
     [kGenReqId]: genReqId,
     // routing method
@@ -253,6 +258,26 @@ function fastify (serverOptions) {
     printPlugins: null,
     hasPlugin: function (name) {
       return this[pluginUtils.kRegisteredPlugins].includes(name) || this[kPluginNameChain].includes(name)
+    },
+    // Explicit read-only config sealing for plugin registration.
+    // The given config is snapshotted and deeply frozen at registration
+    // time; child scopes inherit an independent snapshot they can override
+    // without ever mutating the parent one. The public `register` API and
+    // its options are left untouched.
+    registerSealed: function (plugin, config, opts) {
+      const registerOpts = Object.assign({}, opts, {
+        [kSealedConfigInput]: sealConfig(config)
+      })
+      return this.register(plugin, registerOpts)
+    },
+    getSealedConfig: function () {
+      return this[kSealedConfig]
+    },
+    // Returns the chain of scope names that contributed sealed config,
+    // from the outermost scope to the current one. It intentionally
+    // exposes only names, never config values.
+    getSealedConfigSources: function () {
+      return Object.freeze(this[kSealedConfigSources].slice())
     },
     // http server
     listen,

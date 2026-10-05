@@ -7,7 +7,8 @@ import { FastifyRouterOptions } from '../fastify'
 import { AddContentTypeParser, ConstructorAction, FastifyBodyParser, ProtoAction, getDefaultJsonParser, hasContentTypeParser, removeAllContentTypeParsers, removeContentTypeParser } from './content-type-parser'
 import { ApplicationHook, HookAsyncLookup, HookLookup, LifecycleHook, onCloseAsyncHookHandler, onCloseHookHandler, onErrorAsyncHookHandler, onErrorHookHandler, onListenAsyncHookHandler, onListenHookHandler, onReadyAsyncHookHandler, onReadyHookHandler, onRegisterHookHandler, onRequestAbortAsyncHookHandler, onRequestAbortHookHandler, onRequestAsyncHookHandler, onRequestHookHandler, onResponseAsyncHookHandler, onResponseHookHandler, onRouteHookHandler, onSendAsyncHookHandler, onSendHookHandler, onTimeoutAsyncHookHandler, onTimeoutHookHandler, preCloseAsyncHookHandler, preCloseHookHandler, preHandlerAsyncHookHandler, preHandlerHookHandler, preParsingAsyncHookHandler, preParsingHookHandler, preSerializationAsyncHookHandler, preSerializationHookHandler, preValidationAsyncHookHandler, preValidationHookHandler } from './hooks'
 import { FastifyBaseLogger, FastifyChildLoggerFactory } from './logger'
-import { FastifyRegister } from './register'
+import { FastifyRegister, RegisterOptions } from './register'
+import { FastifyPluginAsync, FastifyPluginCallback, FastifyPluginOptions } from './plugin'
 import { FastifyReply } from './reply'
 import { FastifyRequest } from './request'
 import { RouteGenericInterface, RouteHandlerMethod, RouteOptions, RouteShorthandMethod } from './route'
@@ -180,6 +181,35 @@ export interface FastifyInstance<
 
   register: FastifyRegister<FastifyInstance<RawServer, RawRequest, RawReply, Logger,
     TypeProvider> & SafePromiseLike<undefined>>;
+
+  /**
+   * Registers a plugin with an explicit read-only sealed configuration.
+   * The config is snapshotted and deeply frozen at registration time;
+   * encapsulated child scopes inherit an independent snapshot they can
+   * override without mutating the parent one.
+   */
+  registerSealed(
+    plugin: FastifyPluginCallback<FastifyPluginOptions, RawServer, TypeProvider, Logger>,
+    config: unknown,
+    opts?: RegisterOptions
+  ): FastifyInstance<RawServer, RawRequest, RawReply, Logger, TypeProvider> & SafePromiseLike<undefined>;
+  registerSealed(
+    plugin: FastifyPluginAsync<FastifyPluginOptions, RawServer, TypeProvider, Logger>,
+    config: unknown,
+    opts?: RegisterOptions
+  ): FastifyInstance<RawServer, RawRequest, RawReply, Logger, TypeProvider> & SafePromiseLike<undefined>;
+
+  /**
+   * Returns the sealed configuration snapshot of this encapsulation scope,
+   * or `null` when no config was sealed in this scope chain.
+   */
+  getSealedConfig<SealedConfig = unknown>(): SealedConfig | null;
+
+  /**
+   * Returns the chain of scope names that contributed sealed config, from
+   * the outermost scope to the current one. Names only, never values.
+   */
+  getSealedConfigSources(): readonly string[];
 
   routing(req: RawRequest, res: RawReply): void;
 

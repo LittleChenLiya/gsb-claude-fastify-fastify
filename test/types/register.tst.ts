@@ -243,3 +243,11 @@ expect(
     expect(instance).type.toBe<ServerWithTypeProviderAndLogger>()
   })
 ).type.toBeAssignableTo<ServerWithTypeProviderAndLogger>()
+
+// registerSealed: explicit read-only config sealing
+expect(fastify().registerSealed).type.not.toBeCallableWith(testPluginOptsAsync)
+expect(fastify().registerSealed(testPluginCallback, { nested: { x: 1 } })).type.toBeAssignableTo<FastifyInstance>()
+expect(fastify().registerSealed(testPluginAsync, { nested: { x: 1 } }, { prefix: '/sealed' })).type.toBeAssignableTo<FastifyInstance>()
+expect(fastify().getSealedConfig()).type.toBe<unknown>()
+expect(fastify().getSealedConfig<{ nested: { x: number } }>()).type.toBe<{ nested: { x: number } } | null>()
+expect(fastify().getSealedConfigSources()).type.toBe<readonly string[]>()
