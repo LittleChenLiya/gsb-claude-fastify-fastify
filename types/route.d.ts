@@ -32,6 +32,30 @@ export interface FastifyRouteConfig {
 
 export interface RouteGenericInterface extends RequestGenericInterface, ReplyGenericInterface { }
 
+export interface BusinessValidationError {
+  field: string;
+  message: string;
+}
+
+export type BusinessValidationResult =
+  | BusinessValidationError
+  | BusinessValidationError[]
+  | null
+  | undefined
+  | void;
+
+export type BusinessValidator<
+  RouteGeneric extends RouteGenericInterface = RouteGenericInterface,
+  RawServer extends RawServerBase = RawServerDefault,
+  RawRequest extends RawRequestDefaultExpression<RawServer> = RawRequestDefaultExpression<RawServer>,
+  SchemaCompiler extends FastifySchema = FastifySchema,
+  TypeProvider extends FastifyTypeProvider = FastifyTypeProviderDefault,
+  ContextConfig = ContextConfigDefault,
+  Logger extends FastifyBaseLogger = FastifyBaseLogger
+> = (
+  request: FastifyRequest<RouteGeneric, RawServer, RawRequest, NoInfer<SchemaCompiler>, TypeProvider, ContextConfig, Logger>
+) => Promise<BusinessValidationResult> | BusinessValidationResult;
+
 export type RouteConstraintType = Omit<ConstraintStrategy<any>, 'deriveConstraint'> & {
   deriveConstraint<Context>(req: RawRequestDefaultExpression<RawServerDefault>, ctx?: Context, done?: (err: Error,
     ...args: any) => any): any,
@@ -61,6 +85,9 @@ export interface RouteShorthandOptions<
   schema?: SchemaCompiler, // originally FastifySchema
   attachValidation?: boolean;
   exposeHeadRoute?: boolean;
+
+  validators?: BusinessValidator | BusinessValidator[];
+  validationFields?: string[];
 
   validatorCompiler?: FastifySchemaCompiler<NoInfer<SchemaCompiler>>;
   serializerCompiler?: FastifySerializerCompiler<NoInfer<SchemaCompiler>>;

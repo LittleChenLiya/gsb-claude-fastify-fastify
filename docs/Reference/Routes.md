@@ -57,6 +57,15 @@ fastify.route(options)
   validation error, instead of sending the error to the error handler. The
   default [error format](https://ajv.js.org/api.html#error-objects) is the Ajv
   one.
+* `validators`: an array of async business validator functions that run after
+  schema validation passes. Each validator may return `{ field, message }` (or
+  an array) to signal a business error. Reports are merged in registration
+  order. See the [Business Validation
+  Layer](./Validation-and-Serialization.md#business-validation) documentation.
+* `validationFields`: an array of field paths that validators are allowed to
+  report. A validator returning a path not in this list is diagnosed separately.
+  See the [Business Validation
+  Layer](./Validation-and-Serialization.md#business-validation) documentation.
 * `onRequest(request, reply, done)`: a [function](./Hooks.md#onrequest) called
   as soon as a request is received, it could also be an array of functions.
 * `preParsing(request, reply, payload, done)`: a

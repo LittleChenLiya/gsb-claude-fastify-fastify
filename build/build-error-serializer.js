@@ -11,7 +11,27 @@ const code = FJS({
     statusCode: { type: 'number' },
     code: { type: 'string' },
     error: { type: 'string' },
-    message: { type: 'string' }
+    message: { type: 'string' },
+    validation: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          field: { type: 'string' },
+          message: { type: 'string' }
+        }
+      }
+    },
+    diagnostics: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          field: { type: 'string' },
+          reason: { type: 'string' }
+        }
+      }
+    }
   }
 }, { mode: 'standalone' })
 

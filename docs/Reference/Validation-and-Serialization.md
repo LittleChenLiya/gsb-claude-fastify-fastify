@@ -705,6 +705,110 @@ const errorHandler = (error, request, reply) => {
 }
 ```
 
+### Business Validation Layer
+<a id="business-validation"></a>
+
+The business validation layer is an explicit, opt-in, asynchronous validation
+step that runs *after* the schema (Ajv) validation has passed. It is designed
+for cross-field or business-rule validation that cannot be expressed with JSON
+Schema alone.
+
+When a route registers `validators`, Fastify runs them in parallel and merges
+their reports into an independent result that never touches Ajv's original
+errors. Routes without registered validators take the exact same path as before.
+
+```js
+fastify.post('/signup', {
+  schema: {
+    body: {
+      type: 'object',
+      required: ['email', 'age'],
+      properties: {
+        email: { type: 'string', format: 'email' },
+        age: { type: 'integer', minimum: 18 }
+      }
+    }
+  },
+  validators: [
+    async function checkEmailNotTaken (request) {
+      const exists = await db.userExists(request.body.email)
+      if (exists) {
+        return { field: 'body.email', message: 'email is already registered' }
+      }
+    },
+    async function checkAgeRange (request) {
+      if (request.body.age > 120) {
+        return { field: 'body.age', message: 'age is out of range' }
+      }
+    }
+  ],
+  validationFields: ['body.email', 'body.age']
+}, async (request, reply) => {
+  // handler is only entered when all validators pass
+  return { ok: true }
+})
+```
+
+#### Registration
+
+`validators` is an array of async functions (a single function is also accepted
+and normalized to an array). Each validator receives the `request` object and
+may return:
+
+- a falsy value (`undefined`, `null`, `false`): the field is valid
+- a single object `{ field, message }` (or `{ path, message }`): one error
+- an array of such objects: multiple errors
+
+#### Stable Ordering
+
+Validators run in parallel, but their reports are collected in registration
+order regardless of the order in which the promises settle. This means the
+`validation` array always reflects the order in which the validators were
+declared, not the order in which they completed.
+
+#### Field Path Whitelist
+
+`validationFields` declares the set of field paths that validators are allowed
+to report. A validator that returns a path not in this whitelist is diagnosed
+separately in the `diagnostics` array and the path is dropped from the merged
+errors. This prevents validators from reporting arbitrary or undeclared fields.
+
+```js
+// Response when a validator reports an undeclared path:
+{
+  "statusCode": 400,
+  "code": "FST_ERR_BUSINESS_VALIDATION",
+  "validation": [],
+  "diagnostics": [
+    { "field": "body.undeclared", "reason": "field path is not declared" }
+  ]
+}
+```
+
+#### Sanitized Errors
+
+Errors are sanitized to `{ field, message }` only. A validator can never leak
+the original request value (no `value`, `data`, or other properties are carried
+into the response).
+
+#### Cancellation
+
+If the request is cancelled while validators are still running, late errors (and
+late successes) are dropped: no error is published and the handler is never
+entered. This applies to both real HTTP requests (`request.raw.aborted`) and
+requests aborted through an `AbortSignal` (e.g. `fastify.inject({ signal })`).
+
+#### Error Result
+
+When business validation fails, Fastify returns a `400` response with:
+
+- `code`: `FST_ERR_BUSINESS_VALIDATION`
+- `validation`: the merged array of sanitized errors (in registration order)
+- `diagnostics`: the array of illegal field-path returns (if any)
+
+The business validation error is independent of Ajv's errors: Ajv's original
+error object is never modified.
+
 ### Serialization
 <a id="serialization"></a>
 
