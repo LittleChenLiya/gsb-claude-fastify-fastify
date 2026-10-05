@@ -408,6 +408,97 @@ types:
 
 For more information, see [Ajv Coercion](https://ajv.js.org/coercion.html).
 
+#### Async Business Validators
+<a id="async-validators"></a>
+
+The schema validation layer checks the *shape* of the request. Business rules
+that need asynchronous checks — for example "is this email already registered?"
+or "was this token revoked?" — can be declared with the `asyncValidators`
+route option. The layer is explicit: it only runs for routes that declare it,
+and only after the schema validation (if any) has passed. Routes that do not
+declare `asyncValidators` are completely unaffected.
+
+```js
+fastify.post('/users', {
+  schema: {
+    body: {
+      type: 'object',
+      properties: {
+        email: { type: 'string' },
+        token: { type: 'string' }
+      },
+      required: ['email']
+    }
+  },
+  asyncValidators: [
+    {
+      path: 'body.email',
+      validate: async (email, request) => {
+        if (await fastify.db.emailExists(email)) {
+          return { message: 'email is already registered', code: 'EMAIL_TAKEN' }
+        }
+        return null // pass
+      }
+    },
+    {
+      path: 'body.token',
+      validate: async (token, request) => {
+        if (await fastify.db.tokenRevoked(token)) {
+          return { message: 'token was revoked', code: 'TOKEN_REVOKED' }
+        }
+        return null
+      }
+    }
+  ],
+  handler: async (request, reply) => {
+    // only reached when every async validator passed
+    return { ok: true }
+  }
+})
+```
+
+Each declaration has:
+
+- `path`: the declared field path of the validator, rooted at `body`,
+  `query`, `params` or `headers` (for example `body.email` or
+  `query.traceId`). Declarations with any other root, an empty segment, or a
+  prototype-polluting segment (`__proto__`, `prototype`, `constructor`) are
+  rejected at boot with `FST_ERR_ASYNC_VALIDATORS_INVALID`.
+- `validate(value, request)`: a function — bound to the Fastify instance of
+  the route, like hooks — receiving the value at the declared path and the
+  request object. It may be sync or async. Return `null`/`undefined` to pass,
+  or an error object `{ message, code?, path? }` (or an array of them) to
+  report a business failure.
+
+Behavior of the layer:
+
+- **Parallel with a stable report.** All validators of a route run in
+  parallel and the layer waits for every one of them to settle (a barrier)
+  before reporting. The merged error list is always ordered by registration
+  order, never by settlement order.
+- **Separate result.** Business failures are merged into a single
+  `FST_ERR_ASYNC_VALIDATION` error (status code `400`) whose `validation`
+  property carries the ordered list of `{ path, message, code? }` entries and
+  whose `validationContext` is `'asyncValidators'`. The Ajv validation errors
+  are never modified or reused.
+- **Only declared paths.** A returned error may only reference the declared
+  `path` of its validator. Returning an error for any other path is a
+  contract violation, diagnosed separately with a
+  `FST_ERR_ASYNC_VALIDATOR_PATH` error (status code `500`) that is never
+  merged into the business validation result. Results that are not error
+  objects (for example a bare string) are diagnosed with
+  `FST_ERR_ASYNC_VALIDATOR_RESULT`.
+- **No request values in errors.** Only `message` and `code` are copied from
+  a returned error object into the report; any other property (for example a
+  `value` echoing the request payload) is dropped, so reported errors can
+  never carry original request values.
+- **Cancellation.** If the request is cancelled (the client aborts) while the
+  validators are running, late results — failures and successes alike — are
+  dropped: no error is published and the route handler is never entered.
+- **All or nothing.** The route handler (and the `preHandler` hooks) run only
+  when every validator passed. A validator that throws produces a `500`
+  response through the normal error handling flow.
+
 #### Ajv Plugins
 <a id="ajv-plugins"></a>
 

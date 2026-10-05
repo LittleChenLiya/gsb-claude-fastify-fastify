@@ -107,6 +107,10 @@
     - [FST_ERR_PLUGIN_INVALID_ASYNC_HANDLER](#fst_err_plugin_invalid_async_handler)
     - [FST_ERR_PLUGIN_DEPENDENCY_NOT_REGISTERED](#fst_err_plugin_dependency_not_registered)
     - [FST_ERR_VALIDATION](#fst_err_validation)
+    - [FST_ERR_ASYNC_VALIDATORS_INVALID](#fst_err_async_validators_invalid)
+    - [FST_ERR_ASYNC_VALIDATION](#fst_err_async_validation)
+    - [FST_ERR_ASYNC_VALIDATOR_PATH](#fst_err_async_validator_path)
+    - [FST_ERR_ASYNC_VALIDATOR_RESULT](#fst_err_async_validator_result)
     - [FST_ERR_LISTEN_OPTIONS_INVALID](#fst_err_listen_options_invalid)
     - [FST_ERR_ERROR_HANDLER_NOT_FN](#fst_err_error_handler_not_fn)
     - [FST_ERR_ERROR_HANDLER_ALREADY_SET](#fst_err_error_handler_already_set)
@@ -460,5 +464,9 @@ Below is a table with all the error codes used by Fastify.
 | <a id="fst_err_plugin_invalid_async_handler">FST_ERR_PLUGIN_INVALID_ASYNC_HANDLER</a> | The plugin being registered mixes async and callback styles. | - | [#5141](https://github.com/fastify/fastify/pull/5141) |
 | <a id="fst_err_plugin_dependency_not_registered">FST_ERR_PLUGIN_DEPENDENCY_NOT_REGISTERED</a> | The dependency of a plugin is not registered. | Register the missing dependency before registering this plugin. | [#6774](https://github.com/fastify/fastify/pull/6774) |
 | <a id="fst_err_validation">FST_ERR_VALIDATION</a> | The Request failed the payload validation. | Check the request payload. | [#4824](https://github.com/fastify/fastify/pull/4824) |
+| <a id="fst_err_async_validators_invalid">FST_ERR_ASYNC_VALIDATORS_INVALID</a> | The `asyncValidators` route option is invalid. | Declare an array of `{ path, validate }` entries, with `path` rooted at `body`, `query`, `params` or `headers`. | - |
+| <a id="fst_err_async_validation">FST_ERR_ASYNC_VALIDATION</a> | The request failed the async business validation layer. | Inspect the merged `validation` list on the error. | - |
+| <a id="fst_err_async_validator_path">FST_ERR_ASYNC_VALIDATOR_PATH</a> | An async validator returned an error for a path it did not declare. | Return errors only for the declared `path` of the validator. | - |
+| <a id="fst_err_async_validator_result">FST_ERR_ASYNC_VALIDATOR_RESULT</a> | An async validator returned an invalid result. | Resolve to `null`, an error object `{ message }` or an array of them. | - |
 | <a id="fst_err_listen_options_invalid">FST_ERR_LISTEN_OPTIONS_INVALID</a> | Invalid listen options. | Check the listen options. | [#4886](https://github.com/fastify/fastify/pull/4886) |
 | <a id="fst_err_error_handler_not_fn">FST_ERR_ERROR_HANDLER_NOT_FN</a> | Error Handler must be a function | Provide a function to `setErrorHandler`. | [#5317](https://github.com/fastify/fastify/pull/5317) | <a id="fst_err_error_handler_already_set">FST_ERR_ERROR_HANDLER_ALREADY_SET</a> | Error Handler already set in this scope. Set `allowErrorHandlerOverride: true` to allow overriding. | By default, `setErrorHandler` can only be called once per encapsulation context. | [#6097](https://github.com/fastify/fastify/pull/6098) |

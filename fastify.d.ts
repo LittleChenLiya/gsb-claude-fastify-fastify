@@ -27,7 +27,7 @@ import { FastifyPluginAsync, FastifyPluginCallback, FastifyPluginOptions } from 
 import { FastifyRegister, FastifyRegisterOptions, RegisterOptions } from './types/register'
 import { FastifyReply } from './types/reply'
 import { FastifyRequest, RequestGenericInterface } from './types/request'
-import { RouteGenericInterface, RouteHandler, RouteHandlerMethod, RouteOptions, RouteShorthandMethod, RouteShorthandOptions, RouteShorthandOptionsWithHandler } from './types/route'
+import { RouteGenericInterface, RouteHandler, RouteHandlerMethod, RouteOptions, RouteShorthandMethod, RouteShorthandOptions, RouteShorthandOptionsWithHandler, AsyncValidatorDeclaration, AsyncValidatorErrorObject, AsyncValidatorReport } from './types/route'
 import { FastifySchema, FastifySchemaCompiler, FastifySchemaValidationError, FastifySerializerCompiler, SchemaErrorDataVar, SchemaErrorFormatter } from './types/schema'
 import { FastifyServerFactory, FastifyServerFactoryHandler } from './types/server-factory'
 import { FastifyTypeProvider, FastifyTypeProviderDefault, SafePromiseLike } from './types/type-provider'
@@ -214,6 +214,7 @@ declare namespace fastify {
     FastifyContextConfig, // './types/context'
     RouteHandler, RouteHandlerMethod, RouteOptions, RouteShorthandMethod, RouteShorthandOptions,
     RouteShorthandOptionsWithHandler, RouteGenericInterface, // './types/route'
+    AsyncValidatorDeclaration, AsyncValidatorErrorObject, AsyncValidatorReport, // './types/route'
     FastifyRegister, FastifyRegisterOptions, RegisterOptions, // './types/register'
     FastifyBodyParser, FastifyContentTypeParser, AddContentTypeParser, hasContentTypeParser, getDefaultJsonParser,
     ProtoAction, ConstructorAction, // './types/content-type-parser'

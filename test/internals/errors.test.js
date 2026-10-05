@@ -5,7 +5,7 @@ const errors = require('../../lib/errors')
 const { readFileSync } = require('node:fs')
 const { resolve } = require('node:path')
 
-const expectedErrors = 95
+const expectedErrors = 99
 
 test(`should expose ${expectedErrors} errors`, t => {
   t.plan(1)
@@ -927,6 +927,46 @@ test('FST_ERR_VALIDATION', t => {
   t.assert.strictEqual(error.code, 'FST_ERR_VALIDATION')
   t.assert.strictEqual(error.message, '%s')
   t.assert.strictEqual(error.statusCode, 400)
+  t.assert.ok(error instanceof Error)
+})
+
+test('FST_ERR_ASYNC_VALIDATORS_INVALID', t => {
+  t.plan(5)
+  const error = new errors.FST_ERR_ASYNC_VALIDATORS_INVALID()
+  t.assert.strictEqual(error.name, 'FastifyError')
+  t.assert.strictEqual(error.code, 'FST_ERR_ASYNC_VALIDATORS_INVALID')
+  t.assert.strictEqual(error.message, "Invalid asyncValidators route option for '%s': %s")
+  t.assert.strictEqual(error.statusCode, 500)
+  t.assert.ok(error instanceof Error)
+})
+
+test('FST_ERR_ASYNC_VALIDATION', t => {
+  t.plan(5)
+  const error = new errors.FST_ERR_ASYNC_VALIDATION()
+  t.assert.strictEqual(error.name, 'FastifyError')
+  t.assert.strictEqual(error.code, 'FST_ERR_ASYNC_VALIDATION')
+  t.assert.strictEqual(error.message, '%s')
+  t.assert.strictEqual(error.statusCode, 400)
+  t.assert.ok(error instanceof Error)
+})
+
+test('FST_ERR_ASYNC_VALIDATOR_PATH', t => {
+  t.plan(5)
+  const error = new errors.FST_ERR_ASYNC_VALIDATOR_PATH()
+  t.assert.strictEqual(error.name, 'FastifyError')
+  t.assert.strictEqual(error.code, 'FST_ERR_ASYNC_VALIDATOR_PATH')
+  t.assert.strictEqual(error.message, "Async validator for '%s' broke the result contract: %s")
+  t.assert.strictEqual(error.statusCode, 500)
+  t.assert.ok(error instanceof Error)
+})
+
+test('FST_ERR_ASYNC_VALIDATOR_RESULT', t => {
+  t.plan(5)
+  const error = new errors.FST_ERR_ASYNC_VALIDATOR_RESULT()
+  t.assert.strictEqual(error.name, 'FastifyError')
+  t.assert.strictEqual(error.code, 'FST_ERR_ASYNC_VALIDATOR_RESULT')
+  t.assert.strictEqual(error.message, "Async validator for '%s' returned an invalid result: %s")
+  t.assert.strictEqual(error.statusCode, 500)
   t.assert.ok(error instanceof Error)
 })
 

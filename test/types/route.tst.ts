@@ -574,3 +574,29 @@ expect(fastify().route({
     expect(req.routeOptions.method).type.toBeAssignableTo<string | Array<string>>()
   }
 })).type.toBe<FastifyInstance>()
+
+expect(fastify().route({
+  url: '/async-validators',
+  method: 'POST',
+  asyncValidators: [
+    {
+      path: 'body.email',
+      validate: async function (value, request) {
+        expect(this).type.toBe<FastifyInstance>()
+        expect(value).type.toBe<unknown>()
+        expect(request).type.toBeAssignableTo<FastifyRequest>()
+        return null
+      }
+    },
+    {
+      path: 'query.trace',
+      validate: async (value) => {
+        if (value === undefined) {
+          return [{ message: 'missing trace', code: 'NO_TRACE' }]
+        }
+        return { message: 'invalid trace', path: 'query.trace' }
+      }
+    }
+  ],
+  handler: routeHandler
+})).type.toBe<FastifyInstance>()

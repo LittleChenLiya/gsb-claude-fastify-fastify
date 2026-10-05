@@ -44,6 +44,44 @@ export interface RouteConstraint {
 }
 
 /**
+ * Error object an async business validator may return (or resolve with) to
+ * report a failure. Only `message` and `code` are copied into the reported
+ * error; `path` must match the declared path of the validator.
+ */
+export interface AsyncValidatorErrorObject {
+  message: string;
+  code?: string;
+  path?: string;
+}
+
+export type AsyncValidatorReport = void | null | undefined | boolean | AsyncValidatorErrorObject
+  | AsyncValidatorErrorObject[]
+
+/**
+ * Declaration of an async business validator for the `asyncValidators` route
+ * option. `path` is the declared field path rooted at `body`, `query`,
+ * `params` or `headers`; `validate` receives the value at that path and the
+ * request, and resolves to a report (or an array of reports) on failure.
+ */
+export interface AsyncValidatorDeclaration<
+  RawServer extends RawServerBase = RawServerDefault,
+  RawRequest extends RawRequestDefaultExpression<RawServer> = RawRequestDefaultExpression<RawServer>,
+  RouteGeneric extends RouteGenericInterface = RouteGenericInterface,
+  ContextConfig = ContextConfigDefault,
+  SchemaCompiler extends FastifySchema = FastifySchema,
+  TypeProvider extends FastifyTypeProvider = FastifyTypeProviderDefault,
+  Logger extends FastifyBaseLogger = FastifyBaseLogger
+> {
+  path: string;
+  validate: (
+    this: FastifyInstance<RawServer, RawRequest, RawReplyDefaultExpression<RawServer>, Logger, TypeProvider>,
+    value: unknown,
+    request: FastifyRequest<RouteGeneric, RawServer, RawRequest, NoInfer<SchemaCompiler>, TypeProvider, ContextConfig,
+      Logger>
+  ) => AsyncValidatorReport | Promise<AsyncValidatorReport>;
+}
+
+/**
  * Route shorthand options for the various shorthand methods
  */
 type RouteShorthandHook<T extends (...args: any) => any> = (...args: Parameters<T>) => void | Promise<unknown>
@@ -64,6 +102,8 @@ export interface RouteShorthandOptions<
 
   validatorCompiler?: FastifySchemaCompiler<NoInfer<SchemaCompiler>>;
   serializerCompiler?: FastifySerializerCompiler<NoInfer<SchemaCompiler>>;
+  asyncValidators?: AsyncValidatorDeclaration<RawServer, RawRequest, RouteGeneric, ContextConfig,
+    NoInfer<SchemaCompiler>, TypeProvider, Logger>[];
   bodyLimit?: number;
   handlerTimeout?: number;
   logLevel?: LogLevel;
