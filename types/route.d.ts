@@ -66,6 +66,7 @@ export interface RouteShorthandOptions<
   serializerCompiler?: FastifySerializerCompiler<NoInfer<SchemaCompiler>>;
   bodyLimit?: number;
   handlerTimeout?: number;
+  drainGroup?: string;
   logLevel?: LogLevel;
   config?: FastifyContextConfig & ContextConfig;
   constraints?: RouteConstraint,

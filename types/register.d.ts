@@ -8,6 +8,7 @@ export interface RegisterOptions {
   prefix?: string;
   logLevel?: LogLevel;
   logSerializers?: Record<string, (value: any) => string>;
+  drainGroup?: string;
 }
 
 export type FastifyRegisterOptions<Options> = (RegisterOptions & Options)

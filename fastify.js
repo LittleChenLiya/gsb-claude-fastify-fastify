@@ -34,7 +34,8 @@ const {
   kGenReqId,
   kErrorHandlerAlreadySet,
   kHandlerTimeout,
-  kLogController
+  kLogController,
+  kDrainGroup
 } = require('./lib/symbols.js')
 
 const { createServer } = require('./lib/server')
@@ -154,6 +155,7 @@ function fastify (serverOptions) {
     [kHandlerTimeout]: options.handlerTimeout,
     [kRoutePrefix]: '',
     [kLogLevel]: '',
+    [kDrainGroup]: undefined,
     [kLogSerializers]: null,
     [kHooks]: new Hooks(),
     [kSchemaController]: schemaController,
@@ -215,6 +217,20 @@ function fastify (serverOptions) {
     },
     hasRoute: function _route (options) {
       return router.hasRoute.call(this, { options })
+    },
+    // route-group maintenance (drain) API; the state lives on the shared
+    // router, so it is reachable from every encapsulated instance
+    beginDrain: function _beginDrain (group, maintenance) {
+      return router.drain.beginDrain(group, maintenance)
+    },
+    waitForDrain: function _waitForDrain (group, options) {
+      return router.drain.waitForDrain(group, options)
+    },
+    resume: function _resume (group) {
+      return router.drain.resume(group)
+    },
+    drainState: function _drainState (group) {
+      return router.drain.drainState(group)
     },
     findRoute: function _findRoute (options) {
       return router.findRoute(options)

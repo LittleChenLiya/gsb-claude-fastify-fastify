@@ -115,6 +115,32 @@ type DecorationMethod<This, Return = This> = {
 }
 
 /**
+ * Route-group maintenance (drain) state code.
+ */
+export type DrainStateCode = 'available' | 'draining' | 'drained'
+
+export interface DrainStateSnapshot {
+  group: string;
+  generation: number;
+  state: DrainStateCode;
+  active: number;
+}
+
+export interface DrainMaintenance {
+  statusCode?: number;
+  payload?: string | Record<string, unknown>;
+  headers?: Record<string, string>;
+}
+
+export interface DrainWaitOptions {
+  signal?: AbortSignal;
+}
+
+export interface DrainHandle extends DrainStateSnapshot {
+  wait(options?: DrainWaitOptions): Promise<DrainStateSnapshot>;
+}
+
+/**
  * Fastify server instance. Returned by the core `fastify()` method.
  */
 export interface FastifyInstance<
@@ -222,6 +248,34 @@ export interface FastifyInstance<
     ContextConfig = ContextConfigDefault,
     SchemaCompiler extends FastifySchema = FastifySchema
   >(opts: Pick<RouteOptions<RawServer, RawRequest, RawReply, RouteGeneric, ContextConfig, SchemaCompiler, TypeProvider>, 'method' | 'url' | 'constraints'>): Omit<FindMyWayFindResult<RawServer>, 'store'>;
+
+  // Route-group maintenance (drain) API
+
+  /**
+   * Switch a route group to maintenance mode: in-flight requests keep running,
+   * new requests of the group immediately receive the configured maintenance
+   * response (503 by default). Repeated calls while draining share the same
+   * generation state.
+   */
+  beginDrain(group: string, maintenance?: DrainMaintenance): DrainHandle;
+
+  /**
+   * Wait until the current drain generation of the group has fully drained.
+   * An AbortSignal only cancels the caller's own wait; it never resumes the
+   * route group.
+   */
+  waitForDrain(group: string, options?: DrainWaitOptions): Promise<DrainStateSnapshot>;
+
+  /**
+   * Explicitly leave maintenance mode. Seals the current generation and opens
+   * a new one, so late completions of old requests never touch the new counters.
+   */
+  resume(group: string): DrainStateSnapshot;
+
+  /**
+   * Current state snapshot (state code, generation and active count) of a group.
+   */
+  drainState(group: string): DrainStateSnapshot;
 
   // addHook: overloads
 

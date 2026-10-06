@@ -120,6 +120,12 @@ fastify.route(options)
   [`handlerTimeout`](./Server.md#factory-handler-timeout). Must be a positive
   integer. When the timeout fires, `request.signal` is aborted and a 503 error
   is sent through the error handler (which can be customized per-route).
+* `drainGroup`: name of the route group this route belongs to for
+  maintenance draining. When the group is switched to maintenance with
+  `fastify.beginDrain(name)`, in-flight requests finish normally while new
+  requests of the group immediately receive a configurable 503 response.
+  Inherits the `drainGroup` register option of the encapsulation context when
+  not set. See the [Drain](./Drain.md) documentation.
 * `logLevel`: set log level for this route. See below.
 * `logSerializers`: set serializers to log for this route.
 * `config`: object used to store custom configuration.

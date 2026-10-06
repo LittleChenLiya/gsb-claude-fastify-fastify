@@ -23,6 +23,8 @@ concepts, ordered by likely importance to the reader:
 + [Plugins](./Plugins.md): Explains Fastify's plugin architecture and API.
 + [Encapsulation](./Encapsulation.md): Explains a core concept upon which all
   Fastify plugins are built.
++ [Drain](./Drain.md): Explains how to switch a route group to maintenance
+  mode, draining in-flight requests while rejecting new ones.
 + [Decorators](./Decorators.md): Explains the server, request, and response
   decorator APIs.
 + [Hooks](./Hooks.md): Details the API that allows plugins to integrate with
@@ -40,6 +42,8 @@ This table of contents is in alphabetical order.
   decorator APIs.
 + [Encapsulation](./Encapsulation.md): Explains a core concept upon which all
   Fastify plugins are built.
++ [Drain](./Drain.md): Explains how to switch a route group to maintenance
+  mode, draining in-flight requests while rejecting new ones.
 + [Errors](./Errors.md): Details how Fastify handles errors and lists the
   standard set of errors Fastify generates.
 + [Hooks](./Hooks.md): Details the API that allows plugins to integrate with

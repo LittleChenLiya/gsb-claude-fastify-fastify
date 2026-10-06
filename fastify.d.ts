@@ -13,7 +13,7 @@ import { AddContentTypeParser, ConstructorAction, FastifyBodyParser, FastifyCont
 import { FastifyContextConfig } from './types/context'
 import { FastifyErrorCodes } from './types/errors'
 import { DoneFuncWithErrOrRes, HookHandlerDoneFunction, onCloseAsyncHookHandler, onCloseHookHandler, onErrorAsyncHookHandler, onErrorHookHandler, onListenAsyncHookHandler, onListenHookHandler, onReadyAsyncHookHandler, onReadyHookHandler, onRegisterHookHandler, onRequestAbortAsyncHookHandler, onRequestAbortHookHandler, onRequestAsyncHookHandler, onRequestHookHandler, onResponseAsyncHookHandler, onResponseHookHandler, onRouteHookHandler, onSendAsyncHookHandler, onSendHookHandler, onTimeoutAsyncHookHandler, onTimeoutHookHandler, preCloseAsyncHookHandler, preCloseHookHandler, preHandlerAsyncHookHandler, preHandlerHookHandler, preParsingAsyncHookHandler, preParsingHookHandler, preSerializationAsyncHookHandler, preSerializationHookHandler, preValidationAsyncHookHandler, preValidationHookHandler, RequestPayload } from './types/hooks'
-import { FastifyInstance, FastifyListenOptions, PrintRoutesOptions } from './types/instance'
+import { FastifyInstance, FastifyListenOptions, PrintRoutesOptions, DrainStateCode, DrainStateSnapshot, DrainMaintenance, DrainWaitOptions, DrainHandle } from './types/instance'
 import {
   FastifyBaseLogger,
   FastifyChildLoggerFactory,
@@ -210,6 +210,7 @@ declare namespace fastify {
     FastifyReply, // './types/reply'
     FastifyPluginCallback, FastifyPluginAsync, FastifyPluginOptions, // './types/plugin'
     FastifyListenOptions, FastifyInstance, PrintRoutesOptions, // './types/instance'
+    DrainStateCode, DrainStateSnapshot, DrainMaintenance, DrainWaitOptions, DrainHandle, // './types/instance'
     FastifyLoggerOptions, FastifyBaseLogger, FastifyLogFn, LogLevel, // './types/logger'
     FastifyContextConfig, // './types/context'
     RouteHandler, RouteHandlerMethod, RouteOptions, RouteShorthandMethod, RouteShorthandOptions,
