@@ -34,7 +34,8 @@ const {
   kGenReqId,
   kErrorHandlerAlreadySet,
   kHandlerTimeout,
-  kLogController
+  kLogController,
+  kDrainManager
 } = require('./lib/symbols.js')
 
 const { createServer } = require('./lib/server')
@@ -49,6 +50,7 @@ const { createChildLogger, defaultChildLoggerFactory, createLogger, createLogCon
 const pluginUtils = require('./lib/plugin-utils.js')
 const { getGenReqId, reqIdGenFactory } = require('./lib/req-id-gen-factory.js')
 const { buildRouting, validateBodyLimitOption, buildRouterOptions } = require('./lib/route')
+const { DrainManager } = require('./lib/drain.js')
 const build404 = require('./lib/four-oh-four')
 const getSecuredInitialConfig = require('./lib/initial-config-validation.js')
 const override = require('./lib/plugin-override')
@@ -174,6 +176,10 @@ function fastify (serverOptions) {
     [kPluginNameChain]: ['fastify'],
     [kAvvioBoot]: null,
     [kGenReqId]: genReqId,
+    // The drain manager lives only on the root instance; encapsulated
+    // contexts share it through the prototype chain so that drain groups
+    // are server-wide while group membership follows encapsulation rules.
+    [kDrainManager]: new DrainManager(),
     // routing method
     routing: httpHandler,
     // routes shorthand methods
@@ -285,7 +291,12 @@ function fastify (serverOptions) {
     initialConfig,
     // constraint strategies
     addConstraintStrategy: router.addConstraintStrategy.bind(router),
-    hasConstraintStrategy: router.hasConstraintStrategy.bind(router)
+    hasConstraintStrategy: router.hasConstraintStrategy.bind(router),
+    // route group maintenance (drain) API
+    beginDrain,
+    waitDrain,
+    resumeDrain,
+    drainState
   }
 
   Object.defineProperties(fastify, {
@@ -466,6 +477,29 @@ function fastify (serverOptions) {
 
   function throwIfAlreadyStarted (msg) {
     if (fastify[kState].started) throw new FST_ERR_INSTANCE_ALREADY_STARTED(msg)
+  }
+
+  // Switch a route group to maintenance mode: in-flight requests run to
+  // completion, new requests of the group get the configured maintenance
+  // response (503 by default). Repeated calls share the same generation.
+  function beginDrain (group, response) {
+    return this[kDrainManager].beginDrain(group, response)
+  }
+
+  // Wait for the current drain of a group to complete. The optional
+  // AbortSignal only cancels the caller's wait, it never resumes the group.
+  function waitDrain (group, options) {
+    return this[kDrainManager].waitDrain(group, options)
+  }
+
+  // Explicitly resume a drained/draining group, starting a new generation.
+  function resumeDrain (group) {
+    return this[kDrainManager].resume(group)
+  }
+
+  // Snapshot of a group's drain state: state code, generation, active count.
+  function drainState (group) {
+    return this[kDrainManager].snapshot(group)
   }
 
   // HTTP injection handling

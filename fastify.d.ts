@@ -25,6 +25,7 @@ import {
 } from './types/logger'
 import { FastifyPluginAsync, FastifyPluginCallback, FastifyPluginOptions } from './types/plugin'
 import { FastifyRegister, FastifyRegisterOptions, RegisterOptions } from './types/register'
+import { DrainResponseOptions, DrainStateCode, DrainStateSnapshot, WaitDrainOptions } from './types/drain'
 import { FastifyReply } from './types/reply'
 import { FastifyRequest, RequestGenericInterface } from './types/request'
 import { RouteGenericInterface, RouteHandler, RouteHandlerMethod, RouteOptions, RouteShorthandMethod, RouteShorthandOptions, RouteShorthandOptionsWithHandler } from './types/route'
@@ -215,6 +216,7 @@ declare namespace fastify {
     RouteHandler, RouteHandlerMethod, RouteOptions, RouteShorthandMethod, RouteShorthandOptions,
     RouteShorthandOptionsWithHandler, RouteGenericInterface, // './types/route'
     FastifyRegister, FastifyRegisterOptions, RegisterOptions, // './types/register'
+    DrainStateCode, DrainStateSnapshot, DrainResponseOptions, WaitDrainOptions, // './types/drain'
     FastifyBodyParser, FastifyContentTypeParser, AddContentTypeParser, hasContentTypeParser, getDefaultJsonParser,
     ProtoAction, ConstructorAction, // './types/content-type-parser'
     FastifyError, // '@fastify/error'

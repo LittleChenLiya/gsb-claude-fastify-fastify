@@ -8,6 +8,12 @@ export interface RegisterOptions {
   prefix?: string;
   logLevel?: LogLevel;
   logSerializers?: Record<string, (value: any) => string>;
+  /**
+   * Assigns every route of this encapsulation context (and its nested
+   * scopes, unless overridden) to a drain group that can be switched to
+   * maintenance mode with `fastify.beginDrain(group)`.
+   */
+  drainGroup?: string;
 }
 
 export type FastifyRegisterOptions<Options> = (RegisterOptions & Options)

@@ -8,6 +8,7 @@ import { AddContentTypeParser, ConstructorAction, FastifyBodyParser, ProtoAction
 import { ApplicationHook, HookAsyncLookup, HookLookup, LifecycleHook, onCloseAsyncHookHandler, onCloseHookHandler, onErrorAsyncHookHandler, onErrorHookHandler, onListenAsyncHookHandler, onListenHookHandler, onReadyAsyncHookHandler, onReadyHookHandler, onRegisterHookHandler, onRequestAbortAsyncHookHandler, onRequestAbortHookHandler, onRequestAsyncHookHandler, onRequestHookHandler, onResponseAsyncHookHandler, onResponseHookHandler, onRouteHookHandler, onSendAsyncHookHandler, onSendHookHandler, onTimeoutAsyncHookHandler, onTimeoutHookHandler, preCloseAsyncHookHandler, preCloseHookHandler, preHandlerAsyncHookHandler, preHandlerHookHandler, preParsingAsyncHookHandler, preParsingHookHandler, preSerializationAsyncHookHandler, preSerializationHookHandler, preValidationAsyncHookHandler, preValidationHookHandler } from './hooks'
 import { FastifyBaseLogger, FastifyChildLoggerFactory } from './logger'
 import { FastifyRegister } from './register'
+import { DrainResponseOptions, DrainStateSnapshot, WaitDrainOptions } from './drain'
 import { FastifyReply } from './reply'
 import { FastifyRequest } from './request'
 import { RouteGenericInterface, RouteHandlerMethod, RouteOptions, RouteShorthandMethod } from './route'
@@ -681,6 +682,34 @@ export interface FastifyInstance<
    * Prints the representation of the internal radix tree used by the router
    */
   printRoutes(opts?: PrintRoutesOptions): string;
+
+  /**
+   * Switch a route group to maintenance mode: in-flight requests run to
+   * completion while new requests of the group immediately get the
+   * configured maintenance response (503 by default). Repeated calls share
+   * the same generation state.
+   */
+  beginDrain(group: string, response?: DrainResponseOptions): DrainStateSnapshot;
+
+  /**
+   * Wait for the current drain of a group to complete. The optional
+   * AbortSignal only cancels the caller's wait; it never resumes the group.
+   */
+  waitDrain(group: string, options?: WaitDrainOptions): Promise<DrainStateSnapshot>;
+
+  /**
+   * Explicitly resume a draining/drained group, starting a new generation.
+   * Requests still in flight from the old generation never decrement the
+   * counters of the new one.
+   */
+  resumeDrain(group: string): DrainStateSnapshot;
+
+  /**
+   * Snapshot of a group's drain state: state code (`active` / `draining` /
+   * `drained`), generation number and in-flight count of the current
+   * generation.
+   */
+  drainState(group: string): DrainStateSnapshot;
 
   /**
    * Prints the representation of the plugin tree used by avvio, the plugin registration system

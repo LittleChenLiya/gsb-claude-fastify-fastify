@@ -92,6 +92,8 @@
     - [FST_ERR_HANDLER_TIMEOUT](#fst_err_handler_timeout)
 
     - [FST_ERR_ROUTE_HANDLER_TIMEOUT_OPTION_NOT_INT](#fst_err_route_handler_timeout_option_not_int)
+    - [FST_ERR_DRAIN_GROUP_INVALID](#fst_err_drain_group_invalid)
+    - [FST_ERR_DRAIN_RESPONSE_INVALID](#fst_err_drain_response_invalid)
     - [FST_ERR_ROUTE_REWRITE_NOT_STR](#fst_err_route_rewrite_not_str)
     - [FST_ERR_ROUTE_MISSING_CONTENT_TYPE](#fst_err_route_missing_content_type)
     - [FST_ERR_ROUTE_MISSING_CONTENT](#fst_err_route_missing_content)
@@ -445,6 +447,8 @@ Below is a table with all the error codes used by Fastify.
 | <a id="fst_err_route_body_limit_option_not_int">FST_ERR_ROUTE_BODY_LIMIT_OPTION_NOT_INT</a> | `bodyLimit` option must be an integer. | Use an integer for the `bodyLimit` option. | [#4554](https://github.com/fastify/fastify/pull/4554) |
 | <a id="fst_err_handler_timeout">FST_ERR_HANDLER_TIMEOUT</a> | Request timed out. | Increase the `handlerTimeout` option or optimize the handler. | - |
 | <a id="fst_err_route_handler_timeout_option_not_int">FST_ERR_ROUTE_HANDLER_TIMEOUT_OPTION_NOT_INT</a> | `handlerTimeout` option must be a positive integer. | Use a positive integer for the `handlerTimeout` option. | - |
+| <a id="fst_err_drain_group_invalid">FST_ERR_DRAIN_GROUP_INVALID</a> | Drain group name must be a non-empty string. | Use a non-empty string for the drain group name. | - |
+| <a id="fst_err_drain_response_invalid">FST_ERR_DRAIN_RESPONSE_INVALID</a> | A drain response option is invalid. | Use a valid `statusCode` (100-599) and a headers object for the drain response. | - |
 | <a id="fst_err_route_rewrite_not_str">FST_ERR_ROUTE_REWRITE_NOT_STR</a> | `rewriteUrl` needs to be of type `string`. | Use a string for the `rewriteUrl`. | [#4554](https://github.com/fastify/fastify/pull/4554) |
 | <a id="fst_err_route_missing_content_type">FST_ERR_ROUTE_MISSING_CONTENT_TYPE</a> | `Content-Type` header is required for the request. | Send request with `Content-Type` header. | [#6832](https://github.com/fastify/fastify/pull/6832) |
 | <a id="fst_err_route_missing_content">FST_ERR_ROUTE_MISSING_CONTENT</a> | Body is required for the request. | Send request with payload. | [#6832](https://github.com/fastify/fastify/pull/6832) |

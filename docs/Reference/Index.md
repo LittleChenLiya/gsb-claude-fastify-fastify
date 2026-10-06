@@ -38,6 +38,9 @@ This table of contents is in alphabetical order.
   content type parser and how to add support for new content types.
 + [Decorators](./Decorators.md): Explains the server, request, and response
   decorator APIs.
++ [Drain](./Drain.md): Documents the route group maintenance (drain) API that
+  lets a single route group finish in-flight requests while new ones receive
+  a configurable maintenance response.
 + [Encapsulation](./Encapsulation.md): Explains a core concept upon which all
   Fastify plugins are built.
 + [Errors](./Errors.md): Details how Fastify handles errors and lists the

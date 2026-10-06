@@ -67,6 +67,12 @@ export interface RouteShorthandOptions<
   bodyLimit?: number;
   handlerTimeout?: number;
   logLevel?: LogLevel;
+  /**
+   * Drain group of this route. Defaults to the drain group of the
+   * encapsulation context (register option). Pass a string to override it,
+   * or `null` to explicitly leave an inherited group.
+   */
+  drainGroup?: string | null;
   config?: FastifyContextConfig & ContextConfig;
   constraints?: RouteConstraint,
   prefixTrailingSlash?: 'slash' | 'no-slash' | 'both';
