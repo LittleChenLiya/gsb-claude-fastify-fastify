@@ -44,6 +44,25 @@ export interface RouteConstraint {
 }
 
 /**
+ * A single response format declared through the route `formats` option.
+ * The serializer turns the handler payload into the string (or Buffer)
+ * sent to the client when the format is selected by content negotiation.
+ */
+export interface ResponseFormatDeclaration {
+  contentType: string
+  serializer: (payload: unknown) => string | Buffer
+}
+
+/**
+ * The response formats a route can produce, either as an ordered array of
+ * declarations or as a map from media type to serializer. Declaration order
+ * is the route preference order used during content negotiation.
+ */
+export type ResponseFormatsOption =
+  | ResponseFormatDeclaration[]
+  | Record<string, (payload: unknown) => string | Buffer>
+
+/**
  * Route shorthand options for the various shorthand methods
  */
 type RouteShorthandHook<T extends (...args: any) => any> = (...args: Parameters<T>) => void | Promise<unknown>
@@ -67,6 +86,7 @@ export interface RouteShorthandOptions<
   bodyLimit?: number;
   handlerTimeout?: number;
   logLevel?: LogLevel;
+  formats?: ResponseFormatsOption;
   config?: FastifyContextConfig & ContextConfig;
   constraints?: RouteConstraint,
   prefixTrailingSlash?: 'slash' | 'no-slash' | 'both';

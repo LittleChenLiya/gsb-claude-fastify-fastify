@@ -26,8 +26,8 @@ import {
 import { FastifyPluginAsync, FastifyPluginCallback, FastifyPluginOptions } from './types/plugin'
 import { FastifyRegister, FastifyRegisterOptions, RegisterOptions } from './types/register'
 import { FastifyReply } from './types/reply'
-import { FastifyRequest, RequestGenericInterface } from './types/request'
-import { RouteGenericInterface, RouteHandler, RouteHandlerMethod, RouteOptions, RouteShorthandMethod, RouteShorthandOptions, RouteShorthandOptionsWithHandler } from './types/route'
+import { FastifyRequest, RequestGenericInterface, NegotiatedResponseFormat } from './types/request'
+import { RouteGenericInterface, RouteHandler, RouteHandlerMethod, RouteOptions, RouteShorthandMethod, RouteShorthandOptions, RouteShorthandOptionsWithHandler, ResponseFormatDeclaration, ResponseFormatsOption } from './types/route'
 import { FastifySchema, FastifySchemaCompiler, FastifySchemaValidationError, FastifySerializerCompiler, SchemaErrorDataVar, SchemaErrorFormatter } from './types/schema'
 import { FastifyServerFactory, FastifyServerFactoryHandler } from './types/server-factory'
 import { FastifyTypeProvider, FastifyTypeProviderDefault, SafePromiseLike } from './types/type-provider'
@@ -206,14 +206,15 @@ declare namespace fastify {
   /* Export additional types */
   export type {
     LightMyRequestChain, InjectOptions, LightMyRequestResponse, LightMyRequestCallback, // 'light-my-request'
-    FastifyRequest, RequestGenericInterface, // './types/request'
+    FastifyRequest, RequestGenericInterface, NegotiatedResponseFormat, // './types/request'
     FastifyReply, // './types/reply'
     FastifyPluginCallback, FastifyPluginAsync, FastifyPluginOptions, // './types/plugin'
     FastifyListenOptions, FastifyInstance, PrintRoutesOptions, // './types/instance'
     FastifyLoggerOptions, FastifyBaseLogger, FastifyLogFn, LogLevel, // './types/logger'
     FastifyContextConfig, // './types/context'
     RouteHandler, RouteHandlerMethod, RouteOptions, RouteShorthandMethod, RouteShorthandOptions,
-    RouteShorthandOptionsWithHandler, RouteGenericInterface, // './types/route'
+    RouteShorthandOptionsWithHandler, RouteGenericInterface, ResponseFormatDeclaration,
+    ResponseFormatsOption, // './types/route'
     FastifyRegister, FastifyRegisterOptions, RegisterOptions, // './types/register'
     FastifyBodyParser, FastifyContentTypeParser, AddContentTypeParser, hasContentTypeParser, getDefaultJsonParser,
     ProtoAction, ConstructorAction, // './types/content-type-parser'

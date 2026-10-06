@@ -62,6 +62,13 @@ Request is a core Fastify object containing the following fields:
 - `mediaType` - The media type extracted from `Content-Type` header. When `Content-Type`
   header is missing, it will return `undefined`.
 - `is404` - `true` if request is being handled by 404 handler, `false` otherwise.
+- `negotiatedFormat` - The response format selected by content negotiation for
+  routes that declare the [`formats`](./Routes.md#routes-options) option. It is
+  an object with `contentType` (the selected media type), `q` (the negotiated
+  quality value), `match` (`'default'`, `'exact'`, `'type'` or `'wildcard'`)
+  and `reason` (a human readable explanation of the choice). It is `null`
+  until the response is sent, and stays `null` when the route does not declare
+  `formats` or the negotiation is skipped.
 - `socket` - The underlying connection of the incoming request.
 - `signal` - An `AbortSignal` that aborts when the handler timeout
   fires or the client disconnects. Created lazily on first access, so

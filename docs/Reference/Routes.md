@@ -122,6 +122,29 @@ fastify.route(options)
   is sent through the error handler (which can be customized per-route).
 * `logLevel`: set log level for this route. See below.
 * `logSerializers`: set serializers to log for this route.
+* `formats`: declares the response media types the route can produce, in
+  preference order, together with the serializer for each of them. It accepts
+  either an object mapping media types to serializer functions, or an array of
+  `{ contentType, serializer }` objects. When a route declares `formats`, the
+  `Accept` header of every request is negotiated against the declared media
+  types: quality values (`q`), exact matches, `type/*` and `*/*` wildcards are
+  honored, `q=0` (and invalid q-values) exclude a format, ties are broken by
+  match specificity first and by declaration order last. The selected
+  serializer produces the response body, the `Content-Type` and
+  `Vary: Accept` headers are set automatically, and requests that cannot be
+  satisfied are answered with `406 Not Acceptable`. Without an `Accept`
+  header, the first declared format is used. An explicit `reply.type()` or
+  `reply.serializer()` call, as well as error responses (status code >= 400),
+  skip the negotiation. The outcome of the negotiation is exposed as
+  `request.negotiatedFormat`.
+  ```js
+  fastify.get('/', {
+    formats: {
+      'application/json': (payload) => JSON.stringify(payload),
+      'text/plain': (payload) => `hello=${payload.hello}`
+    }
+  }, async () => ({ hello: 'world' }))
+  ```
 * `config`: object used to store custom configuration.
 * `version`: a [semver](https://semver.org/) compatible string that defined the
   version of the endpoint. [Example](#version-constraints).

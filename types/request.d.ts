@@ -20,6 +20,21 @@ export interface ValidationFunction {
   errors?: null | ErrorObject[];
 }
 
+/**
+ * The outcome of the response format negotiation performed for routes that
+ * declare the `formats` option.
+ */
+export interface NegotiatedResponseFormat {
+  /** The media type selected for the response. */
+  contentType: string;
+  /** The quality value negotiated from the Accept header. */
+  q: number;
+  /** How the format was matched against the Accept header. */
+  match: 'default' | 'exact' | 'type' | 'wildcard';
+  /** Human readable explanation of why this format was selected. */
+  reason: string;
+}
+
 export interface RequestRouteOptions<ContextConfig = ContextConfigDefault, SchemaCompiler = FastifySchema> {
   method: HTTPMethods | HTTPMethods[];
   // `url` can be `undefined` for instance when `request.is404` is true
@@ -63,6 +78,14 @@ export interface FastifyRequest<RouteGeneric extends RouteGenericInterface = Rou
   log: Logger;
   server: FastifyInstance;
   body: RequestType['body'];
+
+  /**
+   * The response format selected by content negotiation for routes that
+   * declare the `formats` option. It is `null` until the response is sent
+   * (and stays `null` when the route has no `formats` option or the
+   * negotiation is skipped).
+   */
+  negotiatedFormat: NegotiatedResponseFormat | null;
 
   /** in order for this to be used the user should ensure they have set the attachValidation option. */
   validationError?: Error & { validation: any; validationContext: string };

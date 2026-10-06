@@ -52,6 +52,7 @@
     - [FST_ERR_LOG_LOGGER_AND_LOGGER_INSTANCE_PROVIDED](#fst_err_log_logger_and_logger_instance_provided)
     - [FST_ERR_LOG_INVALID_LOG_CONTROLLER](#fst_err_log_invalid_log_controller)
     - [FST_ERR_REP_INVALID_PAYLOAD_TYPE](#fst_err_rep_invalid_payload_type)
+    - [FST_ERR_REP_NOT_ACCEPTABLE](#fst_err_rep_not_acceptable)
     - [FST_ERR_REP_RESPONSE_BODY_CONSUMED](#fst_err_rep_response_body_consumed)
     - [FST_ERR_REP_READABLE_STREAM_LOCKED](#fst_err_rep_readable_stream_locked)
     - [FST_ERR_REP_ALREADY_SENT](#fst_err_rep_already_sent)
@@ -92,6 +93,7 @@
     - [FST_ERR_HANDLER_TIMEOUT](#fst_err_handler_timeout)
 
     - [FST_ERR_ROUTE_HANDLER_TIMEOUT_OPTION_NOT_INT](#fst_err_route_handler_timeout_option_not_int)
+    - [FST_ERR_ROUTE_INVALID_RESPONSE_FORMATS](#fst_err_route_invalid_response_formats)
     - [FST_ERR_ROUTE_REWRITE_NOT_STR](#fst_err_route_rewrite_not_str)
     - [FST_ERR_ROUTE_MISSING_CONTENT_TYPE](#fst_err_route_missing_content_type)
     - [FST_ERR_ROUTE_MISSING_CONTENT](#fst_err_route_missing_content)
@@ -406,6 +408,7 @@ Below is a table with all the error codes used by Fastify.
 | <a id="fst_err_log_logger_and_logger_instance_provided">FST_ERR_LOG_LOGGER_AND_LOGGER_INSTANCE_PROVIDED</a> | You cannot provide both `'logger'` and `'loggerInstance'`. | Please provide only one option.  | [#5020](https://github.com/fastify/fastify/pull/5020) |
 | <a id="fst_err_log_invalid_log_controller">FST_ERR_LOG_INVALID_LOG_CONTROLLER</a> | The `logController` option must be an instance of `LogController`. | Extend the `LogController` class and pass an instance. | - |
 | <a id="fst_err_rep_invalid_payload_type">FST_ERR_REP_INVALID_PAYLOAD_TYPE</a> | Reply payload can be either a `string` or a `Buffer`. | Use a `string` or a `Buffer` for the payload. | [#1168](https://github.com/fastify/fastify/pull/1168) |
+| <a id="fst_err_rep_not_acceptable">FST_ERR_REP_NOT_ACCEPTABLE</a> | None of the response formats declared by the route matches the `Accept` header. | Send an `Accept` header compatible with the route `formats` option. | - |
 | <a id="fst_err_rep_response_body_consumed">FST_ERR_REP_RESPONSE_BODY_CONSUMED</a> | Using `Response` as reply payload, but the body is being consumed. | Make sure you don't consume the `Response.body` | [#5286](https://github.com/fastify/fastify/pull/5286) |
 | <a id="fst_err_rep_readable_stream_locked">FST_ERR_REP_READABLE_STREAM_LOCKED</a> | Using `ReadableStream` as reply payload, but locked with another reader. | Make sure you don't call the `Readable.getReader` before sending or release lock with `reader.releaseLock()` before sending. | [#5920](https://github.com/fastify/fastify/pull/5920) |
 | <a id="fst_err_rep_already_sent">FST_ERR_REP_ALREADY_SENT</a> | A response was already sent. | - | [#1336](https://github.com/fastify/fastify/pull/1336) |
@@ -445,6 +448,7 @@ Below is a table with all the error codes used by Fastify.
 | <a id="fst_err_route_body_limit_option_not_int">FST_ERR_ROUTE_BODY_LIMIT_OPTION_NOT_INT</a> | `bodyLimit` option must be an integer. | Use an integer for the `bodyLimit` option. | [#4554](https://github.com/fastify/fastify/pull/4554) |
 | <a id="fst_err_handler_timeout">FST_ERR_HANDLER_TIMEOUT</a> | Request timed out. | Increase the `handlerTimeout` option or optimize the handler. | - |
 | <a id="fst_err_route_handler_timeout_option_not_int">FST_ERR_ROUTE_HANDLER_TIMEOUT_OPTION_NOT_INT</a> | `handlerTimeout` option must be a positive integer. | Use a positive integer for the `handlerTimeout` option. | - |
+| <a id="fst_err_route_invalid_response_formats">FST_ERR_ROUTE_INVALID_RESPONSE_FORMATS</a> | The route `formats` option is invalid. | Declare `formats` as an object or array mapping media types to serializer functions. | - |
 | <a id="fst_err_route_rewrite_not_str">FST_ERR_ROUTE_REWRITE_NOT_STR</a> | `rewriteUrl` needs to be of type `string`. | Use a string for the `rewriteUrl`. | [#4554](https://github.com/fastify/fastify/pull/4554) |
 | <a id="fst_err_route_missing_content_type">FST_ERR_ROUTE_MISSING_CONTENT_TYPE</a> | `Content-Type` header is required for the request. | Send request with `Content-Type` header. | [#6832](https://github.com/fastify/fastify/pull/6832) |
 | <a id="fst_err_route_missing_content">FST_ERR_ROUTE_MISSING_CONTENT</a> | Body is required for the request. | Send request with payload. | [#6832](https://github.com/fastify/fastify/pull/6832) |
