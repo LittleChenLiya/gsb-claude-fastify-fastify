@@ -487,6 +487,32 @@ expect(fastify().route).type.not.toBeCallableWith({
 expect(fastify().route({
   url: '/',
   method: 'GET',
+  handler: routeHandler,
+  responseFormats: [
+    { contentType: 'application/json', serializer: (payload) => JSON.stringify(payload) },
+    { contentType: 'text/plain', serializer: (payload) => String(payload) }
+  ]
+})).type.toBe<FastifyInstance>()
+
+expect(fastify().route).type.not.toBeCallableWith({
+  url: '/',
+  method: 'GET',
+  handler: routeHandler,
+  responseFormats: [
+    { contentType: 'application/json', serializer: 'not-a-function' }
+  ]
+})
+
+expect(fastify().route).type.not.toBeCallableWith({
+  url: '/',
+  method: 'GET',
+  handler: routeHandler,
+  responseFormats: 'application/json'
+})
+
+expect(fastify().route({
+  url: '/',
+  method: 'GET',
   handler: routeHandlerWithReturnValue
 })).type.toBe<FastifyInstance>()
 

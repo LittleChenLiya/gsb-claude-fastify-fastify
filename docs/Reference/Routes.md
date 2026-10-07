@@ -130,6 +130,31 @@ fastify.route(options)
   [find-my-way](https://github.com/delvedor/find-my-way) constraints. Includes
   built-in `version` and `host` constraints, with support for custom constraint
   strategies.
+* `responseFormats`: an ordered list of response formats the route can produce,
+  used to negotiate the response `Content-Type` against the request `Accept`
+  header. Each entry is an object with a concrete `contentType`
+  (`type/subtype`, no wildcards) and a `serializer(payload)` function that
+  returns the serialized response body:
+  ```js
+  fastify.get('/data', {
+    responseFormats: [
+      { contentType: 'application/json', serializer: (payload) => JSON.stringify(payload) },
+      { contentType: 'text/plain', serializer: (payload) => `hello is ${payload.hello}` }
+    ]
+  }, handler)
+  ```
+  For every request the declared formats are matched against the `Accept`
+  header: exact `type/subtype` matches, `type/*` wildcards and `*/*` are
+  supported, and `q` values are honored (`q=0` explicitly excludes a format,
+  an invalid `q` value is treated as not acceptable). The format with the
+  highest weight wins; ties are broken by match specificity (exact over
+  `type/*` over `*/*`) and then by the declaration order. When the request
+  has no `Accept` header, the first declared format is used. The selected
+  `Content-Type` is set on the response and `Accept` is appended to the
+  `Vary` header (preserving any existing `Vary` value). When no declared
+  format is acceptable the route responds with `406 Not Acceptable`. The
+  negotiation is skipped when the handler sets a `Content-Type` or a reply
+  serializer itself.
 * `prefixTrailingSlash`: string used to determine how to handle passing `/` as a
   route with a prefix.
   * `both` (default): Will register both `/prefix` and `/prefix/`.

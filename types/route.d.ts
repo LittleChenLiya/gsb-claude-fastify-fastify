@@ -44,6 +44,17 @@ export interface RouteConstraint {
 }
 
 /**
+ * A single response format a route can produce. Formats are declared as an
+ * ordered list through the `responseFormats` route option; the serializer of
+ * the format that best matches the request `Accept` header is used to
+ * serialize the reply payload.
+ */
+export interface ResponseFormat {
+  contentType: string
+  serializer: (payload: unknown) => string
+}
+
+/**
  * Route shorthand options for the various shorthand methods
  */
 type RouteShorthandHook<T extends (...args: any) => any> = (...args: Parameters<T>) => void | Promise<unknown>
@@ -69,6 +80,7 @@ export interface RouteShorthandOptions<
   logLevel?: LogLevel;
   config?: FastifyContextConfig & ContextConfig;
   constraints?: RouteConstraint,
+  responseFormats?: ResponseFormat[];
   prefixTrailingSlash?: 'slash' | 'no-slash' | 'both';
   errorHandler?: (
     this: FastifyInstance<RawServer, RawRequest, RawReply, Logger, TypeProvider>,
